@@ -7,6 +7,7 @@ const requiredFiles = [
   "index.html",
   "notes.json",
   "assets/styles.css",
+  "assets/notes-cover.png",
   "README.md",
   "AGENTS.md",
 ];
@@ -61,7 +62,7 @@ function checkLocalLinks(relativePath) {
   }
 
   const source = readText(relativePath);
-  const hrefPattern = /\bhref=["']([^"']+)["']/gi;
+  const hrefPattern = /\b(?:href|src)=["']([^"']+)["']/gi;
   const baseDir = path.dirname(relativePath);
   let match;
 
@@ -189,6 +190,10 @@ for (const guidanceFile of ["README.md", "AGENTS.md"]) {
 }
 
 for (const relativePath of publicTextFiles) {
+  checkForObviousPrivateMaterial(relativePath);
+}
+
+for (const relativePath of (manifest?.notes ?? []).map((note) => note.path).filter(Boolean)) {
   checkForObviousPrivateMaterial(relativePath);
 }
 

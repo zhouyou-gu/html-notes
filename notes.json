@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-05-26",
+  "notes": [
+    {
+      "title": "Welcome note",
+      "date": "2026-05-26",
+      "path": "notes/welcome.html",
+      "summary": "How this public HTML notes repo is organized and how agents should update it.",
+      "tags": ["setup", "agent-updates", "privacy"]
+    }
+  ]
+}
