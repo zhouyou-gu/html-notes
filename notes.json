@@ -3,6 +3,13 @@
   "updated": "2026-05-26",
   "notes": [
     {
+      "title": "Model inference profile — park-lab — 2026-05-26",
+      "date": "2026-05-26",
+      "path": "notes/model-inference-profile-park-lab-2026-05-26.html",
+      "summary": "vLLM benchmark profile for the park-lab workstation across tiny, small, medium, and large model tiers.",
+      "tags": ["benchmark", "vllm", "gpu"]
+    },
+    {
       "title": "Welcome note",
       "date": "2026-05-26",
       "path": "notes/welcome.html",

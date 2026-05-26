@@ -133,6 +133,10 @@ h2 {
   padding: 1rem;
 }
 
+.note-card + .note-card {
+  margin-top: 0.85rem;
+}
+
 .note-card p {
   color: var(--muted);
   margin: 0.4rem 0 0;
@@ -173,6 +177,10 @@ h2 {
   padding: clamp(1rem, 5vw, 2.5rem);
 }
 
+.note-page-wide {
+  max-width: 1180px;
+}
+
 .note-nav {
   margin-bottom: 1rem;
 }
@@ -199,6 +207,62 @@ h2 {
 
 .note-article section + section {
   margin-top: 1.75rem;
+}
+
+.table-wrap {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-top: 1rem;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  min-width: 1120px;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  background: #eef7f6;
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+td {
+  color: #25332f;
+}
+
+tbody tr:nth-child(even) {
+  background: #fbfdfc;
+}
+
+.status-ok,
+.status-fail {
+  border-radius: 999px;
+  display: inline-block;
+  font-weight: 800;
+  padding: 0.05rem 0.5rem;
+}
+
+.status-ok {
+  background: #e7f6ec;
+  color: #17613a;
+}
+
+.status-fail {
+  background: #fff1e6;
+  color: #9a3412;
 }
 
 @media (max-width: 760px) {

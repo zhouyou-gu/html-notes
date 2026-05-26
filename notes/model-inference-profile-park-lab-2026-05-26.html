@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Model inference profile &mdash; park-lab &mdash; 2026-05-26 | HTML Notes</title>
+    <meta
+      name="description"
+      content="vLLM model inference benchmark profile for the park-lab workstation."
+    >
+    <link rel="stylesheet" href="../assets/styles.css">
+  </head>
+  <body>
+    <main class="note-page note-page-wide">
+      <nav class="note-nav" aria-label="Site">
+        <a href="../index.html">HTML Notes</a>
+      </nav>
+
+      <article class="note-article">
+        <header>
+          <p class="eyebrow">Benchmark</p>
+          <h1>Model inference profile &mdash; park-lab &mdash; 2026-05-26</h1>
+          <p class="note-dek">
+            vLLM serving benchmark profile for a dual-GPU Blackwell workstation.
+          </p>
+          <time datetime="2026-05-26">May 26, 2026</time>
+        </header>
+
+        <section>
+          <h2>Hardware</h2>
+          <ul>
+            <li>Host: <code>park-lab-WRX90-WS-EVO</code></li>
+            <li>
+              GPU: 2&times; NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation
+              Edition (96 GB VRAM each, 192 GB total)
+            </li>
+            <li>RAM: 125 GB</li>
+            <li>Storage: 2.9 TB NVMe</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Software</h2>
+          <ul>
+            <li>vLLM 0.21.0</li>
+            <li>
+              Python 3.12 (workspace venv
+              <code>~/skillful-ran-benchmark-workspace/.venv-vllm</code>)
+            </li>
+            <li>
+              HF cache:
+              <code>~/skillful-ran-benchmark-workspace/.caches/huggingface</code>
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Workload</h2>
+          <ul>
+            <li>256 in / 256 out / concurrency 16 / 50 prompts</li>
+            <li>Dataset: random &middot; backend: <code>vllm bench serve</code></li>
+            <li><code>--gpu-memory-utilization 0.9</code> (vLLM default)</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Per-model</h2>
+          <div class="table-wrap" role="region" aria-label="Per-model benchmark table" tabindex="0">
+            <table>
+              <thead>
+                <tr>
+                  <th>key</th>
+                  <th>tier</th>
+                  <th>dtype</th>
+                  <th>tp</th>
+                  <th>weights GB</th>
+                  <th>KV GB</th>
+                  <th>graph GB</th>
+                  <th>cold s</th>
+                  <th>warm s</th>
+                  <th>tput tok/s</th>
+                  <th>TTFT p50 ms</th>
+                  <th>TTFT p95 ms</th>
+                  <th>ITL p50 ms</th>
+                  <th>ITL p95 ms</th>
+                  <th>maxconc</th>
+                  <th>status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>gemma-3-4b</td><td>tiny</td><td>bf16</td><td>1</td><td>8.61</td><td>78.8</td><td>0.37</td><td>75.5</td><td>75.5</td><td>410.3</td><td>402.1</td><td>430.1</td><td>25.7</td><td>26.3</td><td>46.9</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>gemma-4-e2b</td><td>tiny</td><td>bf16</td><td>1</td><td>9.90</td><td>74.4</td><td>0.47</td><td>81.1</td><td>45.8</td><td>1300.6</td><td>94.1</td><td>1025.5</td><td>5.5</td><td>6.4</td><td>259.0</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>llama-3.2-3b</td><td>tiny</td><td>bf16</td><td>1</td><td>6.04</td><td>79.6</td><td>0.33</td><td>35.2</td><td>35.2</td><td>542.9</td><td>350.9</td><td>396.1</td><td>24.6</td><td>25.2</td><td>91.0</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>phi-4-mini-flash-reasoning</td><td>tiny</td><td>bf16</td><td>1</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><span class="status-fail">fail</span></td></tr>
+                <tr><td>phi-4-mini-reasoning</td><td>tiny</td><td>bf16</td><td>1</td><td>7.17</td><td>78.0</td><td>0.35</td><td>35.7</td><td>25.4</td><td>1570.7</td><td>145.4</td><td>343.9</td><td>7.5</td><td>8.2</td><td>39.0</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>qwen2.5-1.5b</td><td>tiny</td><td>bf16</td><td>1</td><td>2.98</td><td>81.7</td><td>0.31</td><td>30.8</td><td>20.3</td><td>1674.4</td><td>70.7</td><td>353.8</td><td>3.8</td><td>4.5</td><td>373.4</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>qwen3.5-4b</td><td>tiny</td><td>bf16</td><td>1</td><td>8.61</td><td>74.9</td><td>0.46</td><td>96.3</td><td>76.0</td><td>1279.8</td><td>170.9</td><td>1357.8</td><td>8.3</td><td>8.7</td><td>70.4</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>smollm3-3b</td><td>tiny</td><td>bf16</td><td>1</td><td>5.83</td><td>82.5</td><td>0.35</td><td>25.3</td><td>25.6</td><td>1107.3</td><td>131.2</td><td>1303.0</td><td>8.6</td><td>9.4</td><td>146.6</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>deepseek-r1-distill-qwen-7b</td><td>small</td><td>bf16</td><td>1</td><td>14.32</td><td>70.3</td><td>0.35</td><td>35.6</td><td>25.4</td><td>880.1</td><td>253.7</td><td>1544.3</td><td>11.1</td><td>11.6</td><td>160.7</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>gemma-3-12b</td><td>small</td><td>bf16</td><td>1</td><td>23.41</td><td>64.2</td><td>0.54</td><td>95.6</td><td>90.6</td><td>187.1</td><td>1195.2</td><td>1203.6</td><td>64.7</td><td>65.7</td><td>13.3</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>gemma-4-e4b</td><td>small</td><td>bf16</td><td>1</td><td>15.30</td><td>69.3</td><td>0.53</td><td>86.4</td><td>51.0</td><td>906.7</td><td>177.9</td><td>1088.1</td><td>9.5</td><td>10.0</td><td>83.2</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>llama-3.1-8b</td><td>small</td><td>bf16</td><td>1</td><td>15.00</td><td>69.9</td><td>0.37</td><td>45.3</td><td>40.3</td><td>304.0</td><td>763.9</td><td>794.4</td><td>39.0</td><td>39.7</td><td>69.9</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>llama-3.1-8b-fp8</td><td>small</td><td>compressed-tensors</td><td>1</td><td>8.51</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><span class="status-fail">fail</span></td></tr>
+                <tr><td>ministral-8b</td><td>small</td><td>bf16</td><td>1</td><td>14.99</td><td>70.0</td><td>0.39</td><td>40.5</td><td>25.3</td><td>948.0</td><td>298.8</td><td>387.6</td><td>12.5</td><td>13.2</td><td>62.2</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>mistral-7b-v0.3</td><td>small</td><td>bf16</td><td>1</td><td>13.51</td><td>72.5</td><td>0.37</td><td>35.4</td><td>25.4</td><td>1030.6</td><td>296.9</td><td>384.7</td><td>11.3</td><td>12.0</td><td>72.5</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>phi-4-mini</td><td>small</td><td>bf16</td><td>1</td><td>7.17</td><td>78.0</td><td>0.35</td><td>35.4</td><td>20.3</td><td>1560.4</td><td>140.6</td><td>357.1</td><td>7.6</td><td>8.3</td><td>77.8</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>qwen2.5-7b</td><td>small</td><td>bf16</td><td>1</td><td>14.29</td><td>70.3</td><td>0.35</td><td>35.6</td><td>20.2</td><td>830.3</td><td>253.6</td><td>515.2</td><td>11.1</td><td>11.7</td><td>160.8</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>qwen3-8b</td><td>small</td><td>bf16</td><td>1</td><td>15.27</td><td>69.5</td><td>0.42</td><td>40.3</td><td>25.4</td><td>766.3</td><td>260.9</td><td>549.1</td><td>12.4</td><td>12.9</td><td>61.8</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>qwen3-8b-fp8</td><td>small</td><td>fp8</td><td>1</td><td>8.80</td><td>75.9</td><td>0.41</td><td>45.8</td><td>25.4</td><td>1026.2</td><td>253.9</td><td>530.4</td><td>8.3</td><td>8.8</td><td>67.5</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>qwen3.5-9b</td><td>small</td><td>bf16</td><td>1</td><td>17.66</td><td>65.8</td><td>0.43</td><td>101.1</td><td>40.9</td><td>841.0</td><td>279.1</td><td>1431.2</td><td>13.0</td><td>13.5</td><td>61.9</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>deepseek-r1-distill-qwen-32b</td><td>medium</td><td>bf16</td><td>1</td><td>61.07</td><td>23.2</td><td>0.68</td><td>76.3</td><td>35.4</td><td>235.1</td><td>1157.8</td><td>1599.7</td><td>48.9</td><td>50.2</td><td>11.6</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>qwen2.5-32b</td><td>medium</td><td>bf16</td><td>1</td><td>61.04</td><td>23.2</td><td>0.68</td><td>65.6</td><td>35.5</td><td>228.0</td><td>1172.3</td><td>1373.1</td><td>49.0</td><td>50.3</td><td>11.6</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>qwq-32b</td><td>medium</td><td>bf16</td><td>1</td><td>61.04</td><td>23.2</td><td>0.68</td><td>70.9</td><td>35.4</td><td>227.9</td><td>1158.8</td><td>1363.4</td><td>49.0</td><td>50.3</td><td>11.6</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>llama-3.3-70b</td><td>large</td><td>bf16</td><td>2</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><span class="status-fail">fail</span></td></tr>
+                <tr><td>llama-3.3-70b-awq</td><td>large</td><td>awq</td><td>1</td><td>37.08</td><td>46.1</td><td>1.88</td><td>222.8</td><td>156.3</td><td>14.8</td><td>6636.0</td><td>6657.5</td><td>825.0</td><td>825.9</td><td>18.5</td><td><span class="status-ok">ok</span></td></tr>
+                <tr><td>qwen2.5-72b</td><td>large</td><td>bf16</td><td>2</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><span class="status-fail">fail</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
