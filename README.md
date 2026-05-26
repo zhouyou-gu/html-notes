@@ -11,6 +11,7 @@ A public, no-build repository for sharing small HTML notes through GitHub Pages.
 ## What Is Here
 
 - `index.html` lists published notes.
+- `.nojekyll` tells GitHub Pages to publish the files as static assets.
 - `notes/*.html` contains individual note pages.
 - `notes.json` is the machine-readable manifest for agents.
 - `assets/styles.css` provides shared styling.

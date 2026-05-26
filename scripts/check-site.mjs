@@ -5,6 +5,7 @@ import process from "node:process";
 const root = process.cwd();
 const requiredFiles = [
   "index.html",
+  ".nojekyll",
   "notes.json",
   "assets/styles.css",
   "assets/notes-cover.png",
