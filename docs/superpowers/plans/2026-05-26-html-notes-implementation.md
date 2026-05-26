@@ -14,6 +14,7 @@
 
 - Create `scripts/check-site.mjs`: validates required files, JSON manifest shape, linked note files, local links, and privacy-rule presence.
 - Create `.nojekyll`: disables Jekyll processing for branch-source GitHub Pages.
+- Create `.github/workflows/pages.yml`: verifies and deploys the static site with GitHub Actions Pages.
 - Create `index.html`: public landing page listing notes.
 - Create `notes/welcome.html`: sample note page.
 - Create `notes.json`: manifest consumed by agents and humans.

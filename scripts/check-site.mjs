@@ -6,6 +6,7 @@ const root = process.cwd();
 const requiredFiles = [
   "index.html",
   ".nojekyll",
+  ".github/workflows/pages.yml",
   "notes.json",
   "assets/styles.css",
   "assets/notes-cover.png",
@@ -128,6 +129,26 @@ function checkForObviousPrivateMaterial(relativePath) {
   }
 }
 
+function checkPagesWorkflow() {
+  const relativePath = ".github/workflows/pages.yml";
+  if (!existsSync(filePath(relativePath))) {
+    return;
+  }
+
+  const workflow = readText(relativePath);
+  const requiredSnippets = [
+    "node scripts/check-site.mjs",
+    "actions/upload-pages-artifact",
+    "actions/deploy-pages",
+  ];
+
+  for (const snippet of requiredSnippets) {
+    if (!workflow.includes(snippet)) {
+      fail(`${relativePath} is missing required Pages workflow snippet: ${snippet}`);
+    }
+  }
+}
+
 for (const requiredFile of requiredFiles) {
   requireFile(requiredFile);
 }
@@ -197,6 +218,8 @@ for (const relativePath of publicTextFiles) {
 for (const relativePath of (manifest?.notes ?? []).map((note) => note.path).filter(Boolean)) {
   checkForObviousPrivateMaterial(relativePath);
 }
+
+checkPagesWorkflow();
 
 if (failures.length > 0) {
   console.error("Site verification failed:");

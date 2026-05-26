@@ -35,6 +35,7 @@ ask the user. The default action is to omit or redact.
 - Prefer concise notes with clear headings and dates.
 - Keep shared styling in `assets/styles.css`.
 - Do not add a build system unless the user explicitly asks for one.
+- Do not remove or bypass the Pages workflow verification step.
 - Do not add analytics, trackers, comments, forms, or remote scripts without explicit
   user approval.
 - Do not scrape private sources into this public repository.

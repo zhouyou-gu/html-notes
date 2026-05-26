@@ -12,6 +12,7 @@ A public, no-build repository for sharing small HTML notes through GitHub Pages.
 
 - `index.html` lists published notes.
 - `.nojekyll` tells GitHub Pages to publish the files as static assets.
+- `.github/workflows/pages.yml` verifies and deploys the site to GitHub Pages.
 - `notes/*.html` contains individual note pages.
 - `notes.json` is the machine-readable manifest for agents.
 - `assets/styles.css` provides shared styling.
@@ -48,6 +49,6 @@ static file server while editing.
 
 ## Published Site
 
-GitHub Pages serves the public site from the `main` branch:
+GitHub Pages serves the public site through the Pages workflow on `main`:
 
 https://zhouyou-gu.github.io/html-notes/
