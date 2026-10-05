@@ -30,6 +30,22 @@
         </header>
 
         <section>
+          <h2>Why decision models</h2>
+          <p>
+            Software increasingly calls language models to make small decisions, such as
+            routing a request, choosing a tool, or allowing an action. Language models
+            answer in prose, so developers coax a decision out of generated text and parse
+            it back into values their code can use, which is slow, costly, and fragile.
+            Chat-oriented training also leaves the model's confidence unreliable, so code
+            cannot safely act on it. Decision models fix this by changing the output and
+            not the intelligence. The model reads the input once and returns one of the
+            declared options with calibrated probabilities, as a value code can branch on
+            directly. Because the options are given at call time, it keeps a language
+            model's flexibility while costing about as little as a classifier.
+          </p>
+        </section>
+
+        <section>
           <h2>Framing</h2>
           <ul>
             <li><strong>System One model.</strong> TypeSafe's name for a model that returns
