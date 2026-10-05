@@ -1,7 +1,14 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-05-26",
+  "updated": "2026-10-05",
   "notes": [
+    {
+      "title": "System One decision models — terminology — 2026-10-05",
+      "date": "2026-10-05",
+      "path": "notes/system-one-decision-models-terminology-2026-10-05.html",
+      "summary": "Terms used around Jev and other System One decision models, with plain explanations and public sources.",
+      "tags": ["decision-models", "llm", "terminology"]
+    },
     {
       "title": "Model inference profile — park-lab — 2026-05-26",
       "date": "2026-05-26",

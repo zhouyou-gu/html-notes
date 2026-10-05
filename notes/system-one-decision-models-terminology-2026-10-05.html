@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>System One decision models &mdash; terminology &mdash; 2026-10-05 | HTML Notes</title>
+    <meta
+      name="description"
+      content="Terms used around Jev and other System One decision models, with plain explanations and public sources."
+    >
+    <link rel="stylesheet" href="../assets/styles.css">
+  </head>
+  <body>
+    <main class="note-page">
+      <nav class="note-nav" aria-label="Site">
+        <a href="../index.html">HTML Notes</a>
+      </nav>
+
+      <article class="note-article">
+        <header>
+          <p class="eyebrow">Reading notes</p>
+          <h1>System One decision models &mdash; terminology &mdash; 2026-10-05</h1>
+          <p class="note-dek">
+            Terms used around TypeSafe AI's Jev (released 2026-09-15) and the open and
+            commercial models that followed it. Most terms are vendor or community words
+            a few weeks old, not settled academic terms. Where a meaning is my own
+            inference it says so.
+          </p>
+          <time datetime="2026-10-05">October 5, 2026</time>
+        </header>
+
+        <section>
+          <h2>Framing</h2>
+          <ul>
+            <li><strong>System One model.</strong> TypeSafe's name for a model that returns
+              a typed decision with probabilities and writes no text. It borrows
+              Kahneman's System 1, meaning fast, intuitive judgment.</li>
+            <li><strong>System Two.</strong> In this framing, the role of a language model
+              that reasons step by step and writes text, code, or explanations.</li>
+            <li><strong>Decision model (AI decision model).</strong> The generic name the
+              wider ecosystem uses for the same class of model.</li>
+            <li><strong>"LLM writes, Jev decides, code acts".</strong> The promoted division
+              of labor. The language model plans and writes, the decision model makes the
+              bounded choice, and ordinary code acts on the returned numbers.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Interface</h2>
+          <ul>
+            <li><strong>State.</strong> The input being judged. A string, a JSON object, or
+              an array of texts, up to 32k tokens.</li>
+            <li><strong>Question (typed question, declared question).</strong> A decision
+              written down in advance with its allowed answers. Each question is evaluated
+              against the state in isolation, and several can run in parallel.</li>
+            <li><strong>Primitives.</strong> The three question types below, which together
+              form the whole interface.</li>
+            <li><strong>Choice.</strong> Pick one of up to 255 listed options. Returns the
+              chosen option, a probability for every option, and a confidence.</li>
+            <li><strong>Score.</strong> Place the state on an ordered rubric of 2 to 10
+              levels. Returns the level, a probability per level, and a
+              probability-weighted mean score. The <em>legend</em> is the text label of the
+              returned level.</li>
+            <li><strong>Noul.</strong> A yes/no ("is this true") question that returns one
+              probability between 0 and 1. The word is TypeSafe's coinage. I found no
+              stated origin.</li>
+            <li><strong><code>what</code>, <code>not_for</code>, <code>examples</code>.</strong>
+              The fields that define each option or criterion. They give its meaning, the
+              cases it should not cover, and a few sample cases.</li>
+            <li><strong>Typed decision (typed output).</strong> The answer is a value from
+              the declared set, never free text, so software uses it without parsing.</li>
+            <li><strong>Confidence.</strong> A number computed from the shape of the
+              probability distribution, not a self-report. For three options it is
+              (3 &times; largest probability &minus; 1) / 2, which is 0 when all options
+              are equally likely and 1 when one option holds all the probability. The
+              general form (n &times; largest &minus; 1) / (n &minus; 1) is my
+              inference.</li>
+            <li><strong>"Zero hallucinations".</strong> The guarantee that the output is
+              always one of the declared options. TypeSafe's documentation notes that this
+              holds by construction and is not a measured accuracy.</li>
+            <li><strong><code>/v1/systemone</code>.</strong> The API endpoint and request
+              shape that many clones copy so they can replace Jev directly.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>How the models are built</h2>
+          <ul>
+            <li><strong>Non-autoregressive, single forward pass.</strong> The model reads
+              the input once and produces option probabilities directly, instead of
+              generating tokens one after another.</li>
+            <li><strong>Parallel sampler.</strong> TypeSafe's undisclosed name for how Jev
+              produces several answers in that one pass.</li>
+            <li><strong>RLCD (Reinforcement Learning for Calibrated Decisions).</strong>
+              TypeSafe's training method. It rewards calibrated probabilities using proper
+              scoring rules such as the Brier or log score, on static labeled data rather
+              than live environments.</li>
+            <li><strong>Calibration.</strong> Stated probabilities match observed
+              frequencies. Of all decisions given 0.9 confidence, about 90 percent should be
+              correct.</li>
+            <li><strong>ECE (expected calibration error).</strong> The average gap between
+              stated confidence and actual accuracy across confidence bins.</li>
+            <li><strong>Readout.</strong> The final step that turns the model's internal
+              state or next-token scores into option probabilities. A "linear readout" is a
+              single linear layer.</li>
+            <li><strong>Decision head, pointer head, choice/score/noul heads.</strong> Small
+              trained output layers on a backbone that score the options.</li>
+            <li><strong>Trained versus training-free.</strong> Trained clones fine-tune a
+              model for decisions (for example Laya, Clef, Decider, Tev1-4B).
+              Training-free clones read decisions out of an unchanged open model (for
+              example SemIf, LitJev, AnyJev).</li>
+            <li><strong>Restricted softmax (label-token scoring, logit reading).</strong>
+              The training-free method. Put the options in the prompt with tokens such as
+              numbers, read the next-token probabilities on those tokens only, and
+              renormalize them to sum to one. vLLM's <code>allowed_token_ids</code> does
+              the restriction.</li>
+            <li><strong>Hidden-state head.</strong> A small closed-form classifier fitted on
+              a hidden layer partway through the model, which costs less than running the
+              full depth (AnyJev's stronger variant).</li>
+            <li><strong>Position bias, order invariance, flip rate.</strong> Position bias
+              means the answer changes when the options are reordered. Order invariance is
+              the absence of that. Flip rate is how often the answer changes under
+              reordering.</li>
+            <li><strong>Label prior.</strong> The model's built-in preference for certain
+              option tokens regardless of the input. Some methods divide it out.</li>
+            <li><strong>Fitted temperature (temperature scaling).</strong> A single number
+              that sharpens or flattens the output probabilities, fitted on held-out data
+              to improve calibration.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Using the outputs</h2>
+          <ul>
+            <li><strong>Confidence gating (thresholds, escalation).</strong> Act
+              automatically above one confidence, send to review in a middle band, and
+              escalate to a human or a language model below it. TypeSafe's example bands
+              are above 0.85, 0.6 to 0.85, and below 0.6.</li>
+            <li><strong>"Decide high, route low".</strong> Governance decides which models
+              are allowed per workload, and per-call routing works within that
+              choice.</li>
+            <li><strong>Router, gate, guardrail.</strong> The main jobs these models do in
+              agent systems. A router picks a model tier or tool, a gate allows or blocks
+              an action, and a guardrail screens inputs or outputs.</li>
+            <li><strong>Selective prediction, coverage at error (Cov@&epsilon;),
+              "auto-decidable at &le;5 percent error".</strong> The share of items the
+              model can decide automatically while keeping its error on those items below
+              &epsilon;. The rest are deferred.</li>
+            <li><strong>AURC (area under the risk-coverage curve).</strong> One number
+              summarizing error against coverage over all thresholds. Lower is
+              better.</li>
+            <li><strong><code>max_think</code>, <code>nothink_threshold</code>.</strong>
+              Settings of the reasoning variant Jeeves. The first caps the reasoning
+              length. The second skips reasoning when the first single-pass answer is
+              already confident enough.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Evaluation</h2>
+          <ul>
+            <li><strong>JevBench.</strong> An independent public benchmark of 231 tasks in
+              18 families, such as <code>multi_hop</code>, with easy, standard, hard, and
+              judge tiers. The hard tier holds long multi-condition policies, multi-hop
+              lookups, traps, and deliberately ambiguous cases.</li>
+            <li><strong>JevBench Score.</strong> The geometric mean of Intelligence
+              (accuracy), Calibration, Speed, and Cost, weighted equally.</li>
+            <li><strong>Jev Decision Index.</strong> A comparative leaderboard hosted on
+              Hugging Face.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Known limits</h2>
+          <p>
+            By TypeSafe's own account, Jev does not handle multi-hop reasoning, double
+            negatives, or arithmetic well, and its accuracy drops when the state holds
+            unrelated content. On JevBench the multi-hop family scores between 0.33 and
+            0.67 across the models listed. The current fix is to add reasoning before the
+            readout. Jeeves raises its JevBench result from Jev's 0.866 to 0.935 at a
+            median latency of 3.3 s against about 0.3 s without reasoning.
+          </p>
+        </section>
+
+        <section>
+          <h2>Sources</h2>
+          <ul>
+            <li><a href="https://datanorth.ai/blog/jev-what-it-is-and-why-this-new-model-matters">DataNorth, Jev overview</a></li>
+            <li><a href="https://www.marktechpost.com/2026/09/19/typesafe-ai-releases-jev/">MarkTechPost, Jev release</a></li>
+            <li><a href="https://www.aibuilderclub.com/blog/jev-engineering-guide">Jev engineering guide</a></li>
+            <li><a href="https://www.kevnu.com/en/posts/typesafe-jev-technical-deconstruction-non-autoregressive-decision-primitives-rlcd-and-local-open-source-implementation">Kevnu, technical deconstruction</a></li>
+            <li><a href="https://arxiv.org/abs/2609.38850">OpenJev-RLCD, arXiv 2609.38850</a></li>
+            <li><a href="https://github.com/yanng981/awesome-system-one">awesome-system-one list</a></li>
+            <li><a href="https://github.com/nokia-applied-research/AnyJev">AnyJev</a></li>
+            <li><a href="https://github.com/PostHog/jeeves">Jeeves</a></li>
+            <li><a href="https://github.com/fstandhartinger/jevbench/blob/main/RESULTS-v1.2.md">JevBench results</a></li>
+            <li><a href="https://www.privatemode.ai/blog/system-one-from-glm-flash">A training-free System One model from GLM-Flash</a></li>
+            <li><a href="https://www.kai-waehner.de/blog/2026/09/28/how-system-one-models-like-jev-change-enterprise-ai-architecture/">Kai Waehner, enterprise architecture</a></li>
+          </ul>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
