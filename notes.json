@@ -1,7 +1,14 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-10-05",
+  "updated": "2026-10-06",
   "notes": [
+    {
+      "title": "Dual-system architectures, from psychology to decision models — 2026-10-06",
+      "date": "2026-10-06",
+      "path": "notes/dual-system-architectures-2026-10-06.html",
+      "summary": "How the System 1 and System 2 idea moved from psychology into AI, language models, robots, and System One decision models.",
+      "tags": ["decision-models", "dual-system", "llm"]
+    },
     {
       "title": "System One decision models — terminology — 2026-10-05",
       "date": "2026-10-05",

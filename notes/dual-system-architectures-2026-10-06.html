@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dual-system architectures, from psychology to decision models &mdash; 2026-10-06 | HTML Notes</title>
+    <meta
+      name="description"
+      content="How the System 1 and System 2 idea moved from psychology into AI, language models, robots, and System One decision models."
+    >
+    <link rel="stylesheet" href="../assets/styles.css">
+  </head>
+  <body>
+    <main class="note-page">
+      <nav class="note-nav" aria-label="Site">
+        <a href="../index.html">HTML Notes</a>
+      </nav>
+
+      <article class="note-article">
+        <header>
+          <p class="eyebrow">Reading notes</p>
+          <h1>Dual-system architectures, from psychology to decision models &mdash; 2026-10-06</h1>
+          <p class="note-dek">
+            How the idea of a fast System 1 and a slow System 2 moved from psychology
+            into AI, language models, and robots, and where System One decision models
+            such as Jev fit.
+          </p>
+          <time datetime="2026-10-06">October 6, 2026</time>
+        </header>
+
+        <section>
+          <h2>Two kinds of thinking</h2>
+          <p>
+            In the 1970s, Amos Tversky and Daniel Kahneman catalogued the shortcuts people
+            use when they judge under uncertainty. The shortcuts are fast and usually good
+            enough, but they fail in predictable ways. Psychologists explained the pattern
+            with two kinds of process. One is fast, automatic, and effortless, and handles
+            most of daily life. The other is slow, deliberate, and effortful, uses working
+            memory, and is called on when the fast process is not enough.
+          </p>
+          <p>
+            Dual-process accounts go back at least to Jonathan Evans's work in the 1980s
+            and Steven Sloman's 1996 paper on two systems of reasoning. Keith Stanovich and
+            Richard West gave the two processes the names System 1 and System 2 in 2000.
+            Kahneman used the names in his 2003 Nobel lecture, "Maps of Bounded
+            Rationality", and made them widely known with <em>Thinking, Fast and Slow</em>
+            in 2011. The names are a simplification. Evans and Stanovich (2013) prefer to
+            speak of two types of process rather than two separate systems, and Kahneman
+            called his two systems useful fictions.
+          </p>
+          <p>
+            The theory does not claim that the slow process is better. Deliberation is
+            expensive, and a mind that deliberated about everything would act too slowly.
+            Most behavior is fast, and the slow process is used selectively. With practice,
+            a skill that first needs careful thought, such as driving, becomes automatic.
+          </p>
+          <p>
+            Neuroscience found a similar split. Daw, Niv, and Dayan (2005) described a
+            model-free controller, which acts from cached values (habitual behavior), and a
+            model-based controller, which plans by simulating consequences (goal-directed
+            behavior). Control goes to whichever controller is more certain in the
+            situation at hand. This gave the idea a computational form.
+          </p>
+        </section>
+
+        <section>
+          <h2>The idea enters AI</h2>
+          <p>
+            In 2017, Anthony, Tian, and Barber published "Thinking Fast and Slow with Deep
+            Learning and Tree Search". A slow tree search plans moves in the game Hex, and
+            a fast neural network learns to imitate those plans. The improved network then
+            guides the next round of search. The same loop appeared in AlphaGo Zero that
+            year.
+          </p>
+          <p>
+            In his NeurIPS 2019 keynote, "From System 1 Deep Learning to System 2 Deep
+            Learning", Yoshua Bengio argued that deep learning had mastered System 1 tasks
+            such as perception, and that reasoning, planning, and systematic generalization
+            remained open. Booch et al. (AAAI 2021) built the split as an architecture,
+            SOFAI. Fast solvers react from past experience, slow solvers reason and search,
+            and a metacognitive module chooses between them for each problem. Yann LeCun's
+            2022 position paper uses the same distinction. His Mode-1 produces an action
+            directly from perception, and his Mode-2 plans through a world model.
+          </p>
+        </section>
+
+        <section>
+          <h2>Language models</h2>
+          <p>
+            Large language models gave the distinction an everyday form. Answering
+            directly is commonly called System 1. Generating reasoning before the answer,
+            as in chain-of-thought prompting, is called System 2. Both run in one network,
+            so the mapping is a convenience rather than a claim about architecture.
+          </p>
+          <p>
+            The cost of System 2 here is test-time compute, the tokens and time a model
+            spends on each input. Snell et al. (2024) showed that spending more test-time
+            compute can match a model fourteen times larger, at equal total computation, on
+            problems the smaller model can partly solve. Reasoning models followed. Claude
+            3.7 Sonnet (February 2025) and Qwen3 (April 2025) put both modes in one model,
+            with a switch to turn reasoning on or off and a budget for how many reasoning
+            tokens to spend.
+          </p>
+          <p>
+            Agent research built the split into separate components. SwiftSage (NeurIPS
+            2023) pairs a small fine-tuned model that acts quickly with GPT-4, which plans
+            when the small model struggles. DeepMind's Talker-Reasoner (2024) gives
+            conversation to a fast Talker, and multi-step planning and tool use to a slower
+            Reasoner. Meta's "Distilling System 2 into System 1" (2024) fine-tuned a model
+            on the answers its own reasoning produced, so that it could skip the reasoning.
+            This worked for several techniques but not for chain-of-thought reasoning on
+            math.
+          </p>
+        </section>
+
+        <section>
+          <h2>Robots</h2>
+          <p>
+            Robots need fast control, so the split there runs on two timescales. Figure's
+            Helix runs a 7-billion-parameter vision-language model as System 2 at 7 to 9
+            times per second, and an 80-million-parameter System 1 that controls the joints
+            200 times per second. System 2 passes its intent as a latent vector rather than
+            as words or coordinates. NVIDIA's GR00T N1 follows the same design, and
+            Libra-VLA (2026) runs the two systems asynchronously. Hi Robot (ICML 2025)
+            takes a different route, in which the slow model sends plain-language commands
+            to the fast policy.
+          </p>
+        </section>
+
+        <section>
+          <h2>Four ways System 2 reaches System 1</h2>
+          <p>Across these designs, System 2's knowledge reaches System 1 in four ways.</p>
+          <ul>
+            <li><strong>It takes over hard inputs at run time.</strong> SOFAI and SwiftSage
+              do this, and in model serving it is called a cascade. Every escalated input
+              pays System 2's cost, and the scheme depends on knowing when System 1 is
+              wrong.</li>
+            <li><strong>It trains System 1 offline.</strong> This is distillation, as in
+              expert iteration and Meta's work. It needs training data and retraining
+              whenever the task changes.</li>
+            <li><strong>It sends a signal while both run.</strong> Helix and GR00T N1 use a
+              latent vector, and Hi Robot uses language commands. The latent vector needs
+              the two systems trained together.</li>
+            <li><strong>It writes a plan or program that a cheaper executor runs.</strong>
+              In ReWOO (2023) and LLMCompiler (ICML 2024), a planner writes the full plan
+              up front and workers carry it out. In Code as Policies (ICRA 2023), a
+              language model writes code that controls a robot. Voyager (NeurIPS 2023)
+              builds a library of skills that it reuses later. In classification by
+              description (Menon and Vondrick, ICLR 2023), a language model writes
+              descriptions of each class that a fast vision model scores. Most of these
+              plans are written for each request, while skill libraries and class
+              descriptions are reused across inputs.</li>
+          </ul>
+          <p>
+            Underneath all four is the same economics. System 2 is costly, so System 1
+            should handle as much as it reliably can, and System 2's knowledge should reach
+            it at the lowest cost that still works.
+          </p>
+        </section>
+
+        <section>
+          <h2>Decision models</h2>
+          <p>
+            In September 2026, TypeSafe AI released Jev and called it a System One model.
+            Jev reads its input once and returns a probability for each option the
+            developer listed. It generates no text and does no free-form reasoning.
+            Language models are cast as System Two, handling planning and open-ended
+            writing.
+          </p>
+          <p>Today the two are joined in three of the four ways above.</p>
+          <ul>
+            <li><strong>Design time.</strong> A person, not System 2, writes the decision
+              model's questions and the code that acts on the answers. This takes expert
+              effort for every kind of decision.</li>
+            <li><strong>Run time.</strong> A low-confidence decision escalates to a
+              language model or a person, which is a cascade.</li>
+            <li><strong>Training.</strong> Several open decision models are distilled from
+              the answers of much larger models.</li>
+          </ul>
+          <p>
+            Preprints from the first weeks after release report where this arrangement
+            strains. Yang et al. (2026) found that Jev fails when the right option depends
+            on a latent variable, meaning a fact the input does not state. Jev states that
+            fact correctly when asked for it separately, but does not use it inside a
+            single call. Li et al. (2026) found that cascade routing by confidence works
+            when System 1 is uncertain but fails when it is confidently wrong. Rao and
+            Callison-Burch (2026) found that on Jev's confident mistakes, about 96 percent
+            of language-model judge verdicts repeat the same wrong answer.
+          </p>
+          <p>
+            For a System 1 that does no free-form reasoning, each existing way therefore
+            has a cost. A person's design takes expert effort for every kind of decision. A
+            cascade pays System 2's cost on every hard input and misses confident errors.
+            Distillation needs data and retraining. The fourth way, a plan written by
+            System 2 and run by a cheaper executor, has mostly been used with executors
+            that reason or run code, not with a decision model.
+          </p>
+          <p>
+            The open question is whether System 2 can write, once per task, something a
+            decision model can follow on every input with no free-form reasoning, no
+            training, and no person.
+          </p>
+        </section>
+
+        <section>
+          <h2>Sources</h2>
+          <ul>
+            <li><a href="https://psycnet.apa.org/doi/10.1037/0033-2909.119.1.3">Sloman 1996, The empirical case for two systems of reasoning</a></li>
+            <li><a href="https://www.cambridge.org/core/journals/behavioral-and-brain-sciences/article/rational-distinctions-and-adaptations/B68F6E346E024DF8F49B5AC9EDDABFA7">Stanovich and West 2000, Behavioral and Brain Sciences</a></li>
+            <li><a href="https://ideas.repec.org/a/aea/aecrev/v93y2003i5p1449-1475.html">Kahneman 2003, Maps of Bounded Rationality</a></li>
+            <li><a href="https://arxiv.org/abs/1705.08439">Anthony, Tian, and Barber 2017, Thinking Fast and Slow with Deep Learning and Tree Search</a></li>
+            <li><a href="https://neurips.cc/virtual/2019/invited-talk/15488">Bengio 2019, From System 1 Deep Learning to System 2 Deep Learning</a></li>
+            <li><a href="https://mlanthology.org/aaai/2021/booch2021aaai-thinking">Booch et al. 2021, Thinking Fast and Slow in AI</a></li>
+            <li><a href="https://openreview.net/pdf?id=BZ5a1r-kVsf">LeCun 2022, A Path Towards Autonomous Machine Intelligence</a></li>
+            <li><a href="https://arxiv.org/abs/2408.03314">Snell et al. 2024, Scaling LLM Test-Time Compute Optimally</a></li>
+            <li><a href="https://techcrunch.com/2025/02/24/anthropic-launches-a-new-ai-model-that-thinks-as-long-as-you-want">Claude 3.7 Sonnet launch</a></li>
+            <li><a href="https://arxiv.org/abs/2505.09388">Qwen3 technical report</a></li>
+            <li><a href="https://proceedings.neurips.cc/paper_files/paper/2023/hash/4b0eea69deea512c9e2c469187643dc2-Abstract-Conference.html">SwiftSage, NeurIPS 2023</a></li>
+            <li><a href="https://arxiv.org/abs/2410.08328">Talker-Reasoner 2024</a></li>
+            <li><a href="https://arxiv.org/abs/2407.06023">Distilling System 2 into System 1, 2024</a></li>
+            <li><a href="https://aiwiki.ai/wiki/helix_vla">Helix overview</a></li>
+            <li><a href="https://arxiv.org/abs/2604.24921">Libra-VLA 2026</a></li>
+            <li><a href="https://arxiv.org/abs/2502.19417">Hi Robot, ICML 2025</a></li>
+            <li><a href="https://arxiv.org/abs/2305.18323">ReWOO 2023</a></li>
+            <li><a href="https://arxiv.org/abs/2312.04511">LLMCompiler, ICML 2024</a></li>
+            <li><a href="https://arxiv.org/abs/2209.07753">Code as Policies, ICRA 2023</a></li>
+            <li><a href="https://arxiv.org/abs/2305.16291">Voyager, NeurIPS 2023</a></li>
+            <li><a href="https://iclr.cc/virtual/2023/oral/12774">Menon and Vondrick, ICLR 2023</a></li>
+            <li><a href="https://arxiv.org/abs/2610.01834">Yang et al. 2026, Code Owns the Simulation, Jev Owns the Evaluation</a></li>
+            <li><a href="https://arxiv.org/abs/2609.26550">Li et al. 2026, JEV-as-a-Judge</a></li>
+            <li><a href="https://arxiv.org/abs/2609.29769">Rao and Callison-Burch 2026, Jev vs. LLMs as Rubric Judges</a></li>
+          </ul>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
