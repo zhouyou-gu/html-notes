@@ -1,7 +1,14 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-10-06",
+  "updated": "2026-10-08",
   "notes": [
+    {
+      "title": "Wi-Fi access point beside a campus Wi-Fi connection — 2026-10-08",
+      "date": "2026-10-08",
+      "path": "notes/wifi-ap-beside-campus-wifi-2026-10-08.html",
+      "summary": "Running a Wi-Fi access point on the same card that is connected to campus Wi-Fi, with the PC routing and NATing the access point's clients.",
+      "tags": ["wifi", "networking", "linux"]
+    },
     {
       "title": "Dual-system architectures, from psychology to decision models — 2026-10-06",
       "date": "2026-10-06",

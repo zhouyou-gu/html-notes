@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wi-Fi access point beside a campus Wi-Fi connection &mdash; 2026-10-08 | HTML Notes</title>
+    <meta
+      name="description"
+      content="Running a Wi-Fi access point on the same card that is connected to campus Wi-Fi, with the PC routing and NATing the access point's clients."
+    >
+    <link rel="stylesheet" href="../assets/styles.css">
+  </head>
+  <body>
+    <main class="note-page">
+      <nav class="note-nav" aria-label="Site">
+        <a href="../index.html">HTML Notes</a>
+      </nav>
+
+      <article class="note-article">
+        <header>
+          <p class="eyebrow">Setup notes</p>
+          <h1>Wi-Fi access point beside a campus Wi-Fi connection &mdash; 2026-10-08</h1>
+          <p class="note-dek">
+            A Linux workstation whose only network link is a campus Wi-Fi connection
+            (WPA2-Enterprise, PEAP) also runs its own Wi-Fi access point on the same card.
+            The PC routes the access point's clients to the internet through the campus
+            connection and hides them behind NAT.
+          </p>
+          <time datetime="2026-10-08">October 8, 2026</time>
+        </header>
+
+        <section>
+          <h2>Result</h2>
+          <ul>
+            <li>The campus Wi-Fi connection stays up while the access point runs.</li>
+            <li>Clients of the access point get addresses in 10.42.0.0/24, and their
+              traffic leaves through the campus connection with the PC's address
+              (masquerade NAT).</li>
+            <li>The campus network sees only the PC. New connections from the campus side
+              into 10.42.0.0/24 are rejected, and IPv6 is off on the access point.</li>
+            <li>Clients can still reach the PC itself and other campus hosts, which see
+              that traffic as coming from the PC.</li>
+            <li>The access point comes back at boot through a systemd service.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Hardware and system</h2>
+          <ul>
+            <li>Card: MediaTek MT7925 (Wi-Fi 7), driver <code>mt7925e</code>.</li>
+            <li>Ubuntu 24.04, kernel 6.8 (lowlatency), NetworkManager, Docker 29.</li>
+            <li>Client interface: <code>wlp129s0</code>, connected to campus Wi-Fi on
+              channel 44 (5220 MHz).</li>
+            <li>Access point interface: <code>wlap0</code>, a virtual interface on the
+              same radio.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Checking that the card can do both</h2>
+          <p>
+            <code>iw list</code> reports which interface types can run at the same time.
+            The MT7925 reports this combination:
+          </p>
+          <pre><code>#{ managed, P2P-client } &lt;= 2, #{ AP, P2P-GO } &lt;= 1,
+total &lt;= 2, #channels &lt;= 2</code></pre>
+          <p>
+            One managed (client) interface and one AP interface fit within the total of
+            two. The card can serve two channels, but it then has to switch between them,
+            which roughly halves throughput on both. The access point therefore uses the
+            same channel as the campus connection.
+          </p>
+        </section>
+
+        <section>
+          <h2>Problems and fixes</h2>
+          <ul>
+            <li><strong>Regulatory domain.</strong> The kernel started in the world domain
+              (country 00), which marks 5 GHz channels passive-scan only, so an access
+              point cannot transmit beacons there. Setting the country to Singapore
+              (<code>iw reg set SG</code>) allows an access point on channel 44.</li>
+            <li><strong>Duplicate MAC address.</strong> A new interface created with
+              <code>iw ... interface add</code> copies the parent's MAC address.
+              wpa_supplicant then fails with "Name not unique on network" and
+              NetworkManager shows the device as unavailable. Creating the interface with
+              its own locally administered address fixes it. Set the 0x02 bit of the first
+              byte of the parent's address, for example <code>58:...</code> becomes
+              <code>5a:...</code>.</li>
+            <li><strong>Docker's FORWARD policy.</strong> Docker sets the iptables FORWARD
+              policy to DROP. Clients joined, completed the WPA2 handshake and got a DHCP
+              lease, then disconnected after about 50 seconds because none of their
+              traffic was forwarded. Two ACCEPT rules in the <code>DOCKER-USER</code>
+              chain fix it.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Configuration</h2>
+          <p>
+            <code>&lt;AP_MAC&gt;</code>, <code>&lt;SSID&gt;</code> and
+            <code>&lt;PASSWORD&gt;</code> are placeholders.
+          </p>
+
+          <h3>Regulatory domain at module load</h3>
+          <p><code>/etc/modprobe.d/cfg80211-regdom.conf</code></p>
+          <pre><code>options cfg80211 ieee80211_regdom=SG</code></pre>
+
+          <h3>NetworkManager profile (created once)</h3>
+          <pre><code>sudo iw dev wlp129s0 interface add wlap0 type __ap addr &lt;AP_MAC&gt;
+nmcli con add type wifi ifname wlap0 con-name pc-ap ssid &lt;SSID&gt; \
+  802-11-wireless.mode ap 802-11-wireless.band a 802-11-wireless.channel 44 \
+  802-11-wireless.cloned-mac-address &lt;AP_MAC&gt; \
+  ipv4.method shared ipv6.method ignore \
+  wifi-sec.key-mgmt wpa-psk wifi-sec.psk &lt;PASSWORD&gt;
+nmcli con modify pc-ap connection.autoconnect no</code></pre>
+          <p>
+            <code>ipv4.method shared</code> makes NetworkManager run dnsmasq for DHCP and
+            DNS on 10.42.0.0/24 and install an nftables table
+            (<code>nm-shared-wlap0</code>) with the masquerade rule and the forward rules
+            that reject new inbound connections. Autoconnect is off so that the boot
+            service brings the profile up only after <code>wlap0</code> exists.
+          </p>
+
+          <h3>Boot script</h3>
+          <p><code>/usr/local/sbin/zg-ap-up.sh</code></p>
+          <pre><code>#!/bin/sh
+# Bring up the access point on a virtual interface beside the campus Wi-Fi client.
+set -e
+/usr/sbin/iw reg set SG
+if [ ! -e /sys/class/net/wlap0 ]; then
+    /usr/sbin/iw dev wlp129s0 interface add wlap0 type __ap addr &lt;AP_MAC&gt;
+fi
+for i in $(seq 1 30); do
+    nmcli -t -f DEVICE dev | grep -qx wlap0 &amp;&amp; break
+    sleep 1
+done
+nmcli dev set wlap0 managed yes
+sleep 2
+nmcli con up pc-ap
+# Docker sets the FORWARD policy to DROP; let AP clients out via campus Wi-Fi and replies back.
+/usr/sbin/iptables -N DOCKER-USER 2&gt;/dev/null || true
+/usr/sbin/iptables -C DOCKER-USER -i wlap0 -o wlp129s0 -j ACCEPT 2&gt;/dev/null \
+  || /usr/sbin/iptables -I DOCKER-USER 1 -i wlap0 -o wlp129s0 -j ACCEPT
+/usr/sbin/iptables -C DOCKER-USER -i wlp129s0 -o wlap0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT 2&gt;/dev/null \
+  || /usr/sbin/iptables -I DOCKER-USER 1 -i wlp129s0 -o wlap0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT</code></pre>
+
+          <h3>systemd unit</h3>
+          <p><code>/etc/systemd/system/zg-ap.service</code>, enabled with
+            <code>systemctl enable zg-ap</code></p>
+          <pre><code>[Unit]
+Description=Wi-Fi access point beside campus Wi-Fi
+Requires=sys-subsystem-net-devices-wlp129s0.device NetworkManager.service
+After=sys-subsystem-net-devices-wlp129s0.device NetworkManager.service docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/zg-ap-up.sh
+ExecStop=-/usr/bin/nmcli con down pc-ap
+ExecStop=-/usr/sbin/iw dev wlap0 del
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+          <p>
+            <code>After=docker.service</code> only orders the service after Docker when
+            Docker is installed. It does not require Docker.
+          </p>
+        </section>
+
+        <section>
+          <h2>Working safely over a single Wi-Fi link</h2>
+          <p>
+            Wi-Fi was the PC's only network link, so a driver fault would also cut the
+            SSH session used for the setup. Before each change, a systemd timer was armed
+            to undo it after five minutes:
+          </p>
+          <pre><code>sudo systemd-run --on-active=300 --unit=ap-rollback /bin/sh -c \
+  'nmcli con delete pc-ap; iw dev wlap0 del; nmcli dev connect wlp129s0'</code></pre>
+          <p>
+            The setup commands also ran as a detached unit (<code>systemd-run</code>), so
+            a dropped SSH session could not interrupt them halfway. The timer was
+            cancelled once both connections were confirmed working.
+          </p>
+        </section>
+
+        <section>
+          <h2>Checks</h2>
+          <pre><code>nmcli -t -f DEVICE,STATE,CONNECTION dev | grep ^wl   # both connected
+iw dev wlap0 info                                     # type AP, channel 44
+iw dev wlap0 station dump                             # joined clients
+sudo nft list table ip nm-shared-wlap0                # NAT and forward rules
+sudo iptables -L DOCKER-USER -v -n                    # forwarded packet counters
+systemctl status zg-ap</code></pre>
+          <p>
+            Verified on 2026-10-08. The PC kept internet access over campus Wi-Fi, a
+            client joined the access point and passed traffic through the DOCKER-USER
+            rules, and restarting the service recreated the access point. A full reboot
+            has not been tested yet.
+          </p>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
