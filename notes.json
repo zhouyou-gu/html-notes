@@ -6,7 +6,7 @@
       "title": "The binding problem in J-space — 2026-11-02",
       "date": "2026-11-02",
       "path": "notes/j-space-latent-communication-postmortem-2026-11-02.html",
-      "summary": "Why our J-space communication interface failed to transfer entity–attribute bindings reliably, and what the dense-state controls actually showed.",
+      "summary": "Why shared activation directions did not reliably preserve which attribute belonged to which entity.",
       "tags": [
         "latent-communication",
         "j-space",
