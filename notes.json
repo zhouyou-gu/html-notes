@@ -1,7 +1,18 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-10-08",
+  "updated": "2026-11-02",
   "notes": [
+    {
+      "title": "The binding problem in J-space — 2026-11-02",
+      "date": "2026-11-02",
+      "path": "notes/j-space-latent-communication-postmortem-2026-11-02.html",
+      "summary": "Why our J-space communication interface failed to transfer entity–attribute bindings reliably, and what the dense-state controls actually showed.",
+      "tags": [
+        "latent-communication",
+        "j-space",
+        "research-postmortem"
+      ]
+    },
     {
       "title": "Wi-Fi access point beside a campus Wi-Fi connection — 2026-10-08",
       "date": "2026-10-08",

@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The binding problem in J-space — 2026-11-02 | HTML Notes</title>
+    <meta name="description" content="Why our J-space latent communication project stopped: unreliable entity–attribute binding, weak retrieval and writes, and the limits of a positive dense-state result.">
+    <link rel="stylesheet" href="../assets/styles.css">
+  </head>
+  <body>
+    <main class="note-page">
+      <nav class="note-nav" aria-label="Site">
+        <a href="../index.html">HTML Notes</a>
+      </nav>
+
+      <article class="note-article jspace-note">
+        <header>
+          <p class="eyebrow">Research postmortem</p>
+          <h1>The binding problem in J-space</h1>
+          <p class="note-dek">
+            Why we stopped a project on sparse latent communication between frozen
+            decision models, and what its failures actually establish.
+          </p>
+          <time datetime="2026-11-02">November 2, 2026</time>
+        </header>
+
+        <section>
+          <h2>What we wanted</h2>
+          <p>
+            We wanted one model to pass useful private information to another without
+            sending a text message or retraining their backbones. The sender, TX, would
+            turn its observation into a compact numerical message. The receiver, RX,
+            would combine that message with its own observation and question, then
+            return its normal decision scores.
+          </p>
+          <p>
+            MiniGrid provided the motivating task: TX knows a target door’s color;
+            RX sees the keys and their locations but lacks that color. A useful message
+            must help RX choose the matching key. Plain text can state the fact directly.
+            The research question was whether an internal representation could provide
+            a reusable communication interface. We did not establish a cost or accuracy
+            advantage over text.
+          </p>
+          <p>
+            <strong>The project ended without a reliable J-space communication
+            interface.</strong> It produced some narrow positive results, but none met
+            the original requirement of compact, dependable relational information
+            transfer into a frozen decision model.
+          </p>
+        </section>
+
+        <section>
+          <h2>The proposed interface</h2>
+          <p>
+            A hidden state is the numerical vector at one token position after a
+            transformer block. In this project, J-space meant representing such states
+            using vocabulary-associated directions derived from a fixed Jacobian lens.
+            Our reference nonnegative gradient-pursuit encoder, GP32, selected at most
+            32 active coefficients per state. The dictionary and encoder stayed fixed.
+            The motivation came from work on
+            <a href="https://transformer-circuits.pub/2026/workspace/index.html">verbalizable
+            representations and global workspaces</a>; the
+            <a href="https://huggingface.co/neuronpedia/jacobian-lens">released lenses</a>
+            supplied concrete artifacts to investigate.
+          </p>
+          <p>The final J-space attention design had three operations:</p>
+          <ol>
+            <li>Encode RX’s question-position states as sparse J-codes, then reconstruct
+              vectors to use as queries.</li>
+            <li>Compare each query with TX’s token states, apply softmax to the scores,
+              and encode the resulting weighted TX state as a sparse reply.</li>
+            <li>Write the reply into the corresponding existing RX positions through
+              the fixed dictionary, preserving the incoming reconstruction remainder
+              and enforcing the declared sparse, nonnegative endpoint.</li>
+          </ol>
+          <p>
+            This was an attention-like computation built outside the model’s native
+            attention. It had no learned query/key alignment. Sharing directions was
+            supposed to make the extracted message readable and writable across
+            contexts. That was the assumption the experiments failed to establish.
+          </p>
+        </section>
+
+        <section>
+          <h2>The distinction that mattered: presence versus binding</h2>
+          <p>Consider two scenes:</p>
+          <pre><code>Scene A: a red door and a blue chair.
+Scene B: a blue door and a red chair.</code></pre>
+          <p>
+            Both contain exactly the same objects and colors. The difference is which
+            color belongs to which object. This association is the binding. Finding
+            features for “door,” “chair,” “red” and “blue” does not, by itself, recover it.
+          </p>
+          <p>
+            An encoding that simply sums independent object and color features would
+            give both scenes the same vector:
+          </p>
+          <pre><code>door + chair + red + blue</code></pre>
+          <p>
+            Once the two scenes have the same code, no decoder can tell them apart from
+            that code alone. A larger space would not fix an encoder that still throws
+            away the pairings. Research on
+            <a href="https://arxiv.org/abs/2310.17191">entity binding in language models</a>
+            studies mechanisms that preserve these associations rather than just their
+            constituent features.
+          </p>
+          <p>
+            <strong>This sum is an illustration, not a measured collision of our
+            J-codes.</strong> Our experiments showed unreliable binding readout and
+            transfer. They did not prove that the sparse representation erased every
+            relation, or that J-space is inherently too small to hold one.
+          </p>
+        </section>
+
+        <section>
+          <h2>What failed in the J-space experiments</h2>
+          <p>
+            We reduced the problem to four object–color facts. All 24 permutations of
+            four colors across four objects gave the same word inventory while changing
+            the bindings. Asking for each object’s color produced 96 forced-choice cases.
+            These were development tests, not an independent confirmation set.
+          </p>
+          <div class="table-wrap" role="region" aria-label="J-space test results" tabindex="0">
+            <table class="compact-table">
+              <caption>J-space attention: 96 forced-choice color questions</caption>
+              <thead><tr><th scope="col">Configuration</th><th scope="col">Correct</th></tr></thead>
+              <tbody>
+                <tr><td>No communication</td><td>24/96</td></tr>
+                <tr><td>Original J-space attention</td><td>24/96</td></tr>
+                <tr><td>Calibrated routing</td><td>26/96</td></tr>
+                <tr><td>Calibrated write strength</td><td>24/96</td></tr>
+                <tr><td>Both calibrations</td><td>25/96</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            The original messages changed all 96 output distributions, but changed only
+            one selected answer. Changing an activation was therefore not evidence of
+            useful communication. The best calibration stayed close to the 25% reference
+            level of the four-choice test.
+          </p>
+          <p>Three problems were visible in the saved traces:</p>
+          <ul>
+            <li><strong>Weak queries and writes.</strong> The decoded query norms were
+              about 0.1% of the native state norms, and the initial softmax weights were
+              almost uniform. Correcting routing and write scales did not solve the task.
+              These norm ratios are not percentages of semantic information.</li>
+            <li><strong>Retrieval without dependable binding.</strong> Calibrated
+              attention sometimes found the queried object word, but did not reliably
+              find its associated color. A causal object-token state also cannot contain
+              a color that occurs later in its input.</li>
+            <li><strong>Writing without demonstrated interpretation.</strong> A valid
+              sparse endpoint and a preserved reconstruction remainder qualified the
+              numerical operation. They did not establish that RX treated the edit as
+              the intended fact or used it to choose the right action.</li>
+          </ul>
+          <p>
+            Earlier trained reading experiments also found partial rather than general
+            recovery. In one inspected, equal-color-count exchange subset, a selected
+            sparse reader answered both sides correctly in only 21 of 192 pairs.
+            Specialized readers did succeed under supplied mention positions and
+            programmed two-object rules. Those narrower successes do not support the
+            stronger claim that relations are absent from J-space; they also did not
+            establish an autonomous communication interface.
+          </p>
+        </section>
+
+        <section id="dense-results">
+          <h2>The positive result we should keep</h2>
+          <p>
+            We then tested a separate dense readout path using a
+            <a href="https://huggingface.co/EvilScript/activation-oracle-gemma-4-31B-it">released
+            Gemma 4 31B instruction-model Activation Oracle</a>, trained partly on
+            LatentQA. This is a previously trained decoder, not the original LatentQA
+            Llama checkpoint and not an untrained native decision model. We performed
+            no additional training in these final tests. The
+            <a href="https://github.com/federicotorrielli/activation_oracles/blob/7a37dee03c46c88466cf72c2fe1ecbeadba9e6d3/docs/evilscript_gemma4_report.md">release’s
+            implementation report</a> describes its trained interface.
+          </p>
+          <p>The source contained only these four sentences, with their colors permuted:</p>
+          <pre><code>The door is red.
+The chair is blue.
+The table is green.
+The box is yellow.</code></pre>
+          <p>
+            They occupy 23 fact-token positions in the tested tokenizer. RX received
+            a layer label, 23 ordinary <code> ?</code> placeholder tokens and one question:
+            “What color is the door?” or “What object is described as red?” It never
+            received the source facts as text. Each of the same 24 assignments generated
+            two answers, giving 48 answers per configuration.
+          </p>
+          <div class="table-wrap" role="region" aria-label="Dense readout results" tabindex="0">
+            <table class="compact-table">
+              <caption>Separate dense interfaces: 24 assignments, two questions each</caption>
+              <thead>
+                <tr><th scope="col">Interface</th><th scope="col">Door color</th><th scope="col">Red object</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Raw state replacement, 45 → 45</td><td>12/24</td><td>3/24</td></tr>
+                <tr><td>Matching replacements at 44 and 45</td><td>7/24</td><td>4/24</td></tr>
+                <tr><td><strong>Raw state replacement, 1 → 1</strong></td><td><strong>24/24</strong></td><td><strong>24/24</strong></td></tr>
+                <tr><td>Attention-only memory at 44</td><td>4/24</td><td>0/24</td></tr>
+                <tr><td>Attention-only memory at 1</td><td>10/24</td><td>0/24</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Block numbers are zero-based. In replacement, we copied each TX fact-position
+            state after the stated block directly into its corresponding RX placeholder
+            position after the matching block, without normalization or addition. The
+            1 → 1 result correctly tracked all tested color swaps. It is a genuine
+            positive result for reading the full dense sequence with this trained oracle.
+          </p>
+          <p>
+            It is not compact communication: 23 vectors of width 5,376 in BF16 require
+            247,296 tensor bytes, before metadata. It also uses extra placeholder
+            positions, no J-codes, and generated answers rather than native action scores.
+            Reading all facts through this route does not establish a one-vector encoder,
+            a J-space channel, or control of a complete task.
+          </p>
+          <p>
+            The attention-only tests used a different operation: RX’s native queries
+            attended jointly to its own keys and values and a separate bank containing
+            TX’s 23 fact-token keys and values. Only one RX block could access that bank;
+            no hidden states were replaced. The tested blocks were sliding-attention
+            blocks, and TX’s original rotary positions were retained. The prompt’s
+            Layer 45 framing stayed fixed between these two attention runs; the
+            successful replacement-at-1 run used Layer 1 framing. This is not a perfectly
+            isolated replacement-versus-attention comparison, nor a test of every
+            possible cross-attention design.
+          </p>
+        </section>
+
+        <section>
+          <h2>What the failures do not prove</h2>
+          <p>
+            We did not isolate a single fundamental cause. The initial lens was fitted
+            on the base model, while the communication experiments used an instruction
+            checkpoint. A later instruction-model lens did not pin its fitting-model
+            revision. Its short-prompt “red” position also fell inside the first 16
+            positions excluded by the stated fitting recipe. A missing “door” entry in
+            a sparse readout was therefore not proof that the underlying state lacked
+            the relation.
+          </p>
+          <p>
+            Implementation checks mattered too. We corrected an offline logit-lens
+            softcap precision mismatch without changing prior GP32 or native decision
+            results. An initial attention override failed the native-mask guard before
+            scoring; the repaired path preserved native masks and passed exact
+            no-message hidden-state parity. Numerical checks made the reported tests
+            interpretable, but did not make their answers correct.
+          </p>
+          <p>
+            The final panels were small, fixed-template development evidence. They
+            establish neither broad generalization nor a theorem about representational
+            capacity. We have no measured code collision proving that two different
+            bindings became identical, and a failed decoder alone cannot prove the
+            information is absent.
+          </p>
+        </section>
+
+        <section>
+          <h2>Why we stopped</h2>
+          <p>
+            We could keep changing layers and gains, but the experiments had not supplied
+            a dependable mechanism for extracting, preserving and writing a relation.
+            The project’s practical requirement was reliable decision support, not a
+            changed probability distribution or an occasional correct answer.
+          </p>
+          <p>
+            <strong>The failure was in the tested communication protocol.</strong>
+            J-space provided activation directions. It did not establish that selecting
+            and mixing those directions preserved “red belongs to the door,” or that
+            writing the resulting mixture made RX compute the answer it would obtain
+            from the original facts.
+          </p>
+          <p>
+            We stopped this branch and retained the failed tests, implementation
+            corrections and narrow positive results. The useful conclusion is a
+            requirement for a future interface: demonstrate that messages distinguish
+            matched binding swaps and cause the receiver to use those distinctions,
+            before claiming a general channel for latent communication.
+          </p>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>

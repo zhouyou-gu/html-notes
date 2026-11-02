@@ -282,3 +282,39 @@ tbody tr:nth-child(even) {
     flex-wrap: wrap;
   }
 }
+
+/* Keep research-note tables readable within the existing article layout. */
+.compact-table {
+  min-width: 0;
+}
+
+.compact-table caption {
+  color: var(--muted);
+  padding: 0.65rem;
+  text-align: left;
+}
+
+.compact-table th,
+.compact-table td {
+  vertical-align: top;
+  white-space: normal;
+}
+
+.jspace-note pre {
+  background: #edf4f1;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1rem;
+  white-space: pre-wrap;
+}
+
+.jspace-note pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.jspace-note h1 {
+  font-size: clamp(2.5rem, 6vw, 4.25rem);
+  text-wrap: balance;
+}
