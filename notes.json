@@ -3,7 +3,7 @@
   "updated": "2026-11-08",
   "notes": [
     {
-      "title": "The binding problem in J-space \u2014 2026-11-02",
+      "title": "The binding problem in J-space — 2026-11-02",
       "date": "2026-11-02",
       "path": "notes/j-space-latent-communication-postmortem-2026-11-02.html",
       "summary": "Why shared activation directions did not reliably preserve which attribute belonged to which entity.",
@@ -14,59 +14,39 @@
       ]
     },
     {
-      "title": "Wi-Fi access point beside a campus Wi-Fi connection \u2014 2026-10-08",
+      "title": "Wi-Fi access point beside a campus Wi-Fi connection — 2026-10-08",
       "date": "2026-10-08",
       "path": "notes/wifi-ap-beside-campus-wifi-2026-10-08.html",
       "summary": "Running a Wi-Fi access point on the same card that is connected to campus Wi-Fi, with the PC routing and NATing the access point's clients.",
-      "tags": [
-        "wifi",
-        "networking",
-        "linux"
-      ]
+      "tags": ["wifi", "networking", "linux"]
     },
     {
-      "title": "Dual-system architectures, from psychology to decision models \u2014 2026-10-06",
+      "title": "Dual-system architectures, from psychology to decision models — 2026-10-06",
       "date": "2026-10-06",
       "path": "notes/dual-system-architectures-2026-10-06.html",
       "summary": "How the System 1 and System 2 idea moved from psychology into AI, language models, robots, and System One decision models.",
-      "tags": [
-        "decision-models",
-        "dual-system",
-        "llm"
-      ]
+      "tags": ["decision-models", "dual-system", "llm"]
     },
     {
-      "title": "System One decision models \u2014 terminology \u2014 2026-10-05",
+      "title": "System One decision models — terminology — 2026-10-05",
       "date": "2026-10-05",
       "path": "notes/system-one-decision-models-terminology-2026-10-05.html",
       "summary": "Terms used around Jev and other System One decision models, with plain explanations and public sources.",
-      "tags": [
-        "decision-models",
-        "llm",
-        "terminology"
-      ]
+      "tags": ["decision-models", "llm", "terminology"]
     },
     {
-      "title": "Model inference profile \u2014 park-lab \u2014 2026-05-26",
+      "title": "Model inference profile — park-lab — 2026-05-26",
       "date": "2026-05-26",
       "path": "notes/model-inference-profile-park-lab-2026-05-26.html",
       "summary": "vLLM benchmark profile for the park-lab workstation across tiny, small, medium, and large model tiers.",
-      "tags": [
-        "benchmark",
-        "vllm",
-        "gpu"
-      ]
+      "tags": ["benchmark", "vllm", "gpu"]
     },
     {
       "title": "Welcome note",
       "date": "2026-05-26",
       "path": "notes/welcome.html",
       "summary": "How this public HTML notes repo is organized and how agents should update it.",
-      "tags": [
-        "setup",
-        "agent-updates",
-        "privacy"
-      ]
+      "tags": ["setup", "agent-updates", "privacy"]
     }
   ]
 }
