@@ -38,7 +38,10 @@
     "measuredOverallControlHz": 49.31642258592218,
     "wallDurationS": 10.138610502999654,
     "controlCycles": 500,
-    "medianPipelineReciprocalHz": 100.65999740498526
+    "medianPipelineReciprocalHz": 100.65999740498526,
+    "newModelActionsHz": 50,
+    "actionReleaseChecksHz": 1000,
+    "actionReleaseMeaning": "The 1000 Hz rate is for queue checks and release opportunities, not new model actions."
   },
   "pipelineWallTime": {
     "unit": "ms",

@@ -68,7 +68,7 @@
               <thead><tr><th scope="col">Step</th><th scope="col">Frequency</th><th scope="col">Clock</th></tr></thead>
               <tbody>
                 <tr><th scope="row">Observations, history, goals and Metatron</th><td>50 Hz; every 20 ms</td><td>Simulation time</td></tr>
-                <tr><th scope="row">Action release, PD and physics</th><td>1,000 Hz; every 1 ms</td><td>Simulation time</td></tr>
+                <tr><th scope="row">Delay queue checks, PD and physics</th><td>1,000 Hz; every 1 ms</td><td>Simulation time</td></tr>
                 <tr><th scope="row">Measured overall control rate</th><td>49.32 Hz; 500 cycles in 10.1386 s</td><td>Wall time; includes the first-cycle delay</td></tr>
               </tbody>
             </table>
@@ -76,7 +76,9 @@
           <p>Constant action delays of 0, 1, 2, 3, 4, 5, 6, 7 and 8 ms were tested.
             The delay resolution was 1 ms. An action produced at simulation time 40 ms
             with 3 ms added delay takes effect at 43 ms; the next model call remains
-            at 60 ms. PD keeps the previous target until a new action is released.</p>
+            at 60 ms. The model produces 50 new actions per simulated second;
+            checking the queue 1,000 times per second does not produce extra actions.
+            PD keeps the previous target until a new action is released.</p>
           <p>The reciprocal of the 9.93 ms median pipeline time is about 101 calculations
             per second. That is not the configured 50 Hz action frequency and does not
             establish a sustained real-time rate.</p>

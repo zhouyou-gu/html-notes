@@ -6,7 +6,7 @@
       "title": "Metatron G1: pipeline time and action delay \u2014 2026-11-07",
       "date": "2026-11-07",
       "path": "notes/metatron-g1-pipeline-delay-2026-11-07.html",
-      "summary": "Standalone G1 measurements: pipeline delay components, control frequencies, and motion with added action delay.",
+      "summary": "Standalone G1 measurements: pipeline delay components, 50 Hz model control, 1 kHz physics, and motion with added action delay.",
       "tags": [
         "robot-control",
         "metatron",
