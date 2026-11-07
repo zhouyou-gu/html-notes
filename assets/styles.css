@@ -318,3 +318,20 @@ tbody tr:nth-child(even) {
   font-size: clamp(2.5rem, 6vw, 4.25rem);
   text-wrap: balance;
 }
+
+/* Standalone robot timing note. */
+.timing-note h1 {
+  font-size: clamp(2.4rem, 6vw, 4.25rem);
+  text-wrap: balance;
+}
+
+.timing-note code {
+  overflow-wrap: anywhere;
+}
+
+.pipeline-flow {
+  background: #edf4f1;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1rem;
+}

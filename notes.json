@@ -1,7 +1,19 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-11-02",
+  "updated": "2026-11-07",
   "notes": [
+    {
+      "title": "Metatron G1: pipeline time and action delay \u2014 2026-11-07",
+      "date": "2026-11-07",
+      "path": "notes/metatron-g1-pipeline-delay-2026-11-07.html",
+      "summary": "Standalone G1 measurements: pipeline delay components, control frequencies, and motion with added action delay.",
+      "tags": [
+        "robot-control",
+        "metatron",
+        "simulation",
+        "delay"
+      ]
+    },
     {
       "title": "The binding problem in J-space — 2026-11-02",
       "date": "2026-11-02",

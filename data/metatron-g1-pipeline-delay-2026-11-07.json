@@ -1,0 +1,189 @@
+{
+  "date": "2026-11-07",
+  "scope": "Standalone simulation; no wireless or ROS data path",
+  "model": {
+    "name": "Metatron v1 G1",
+    "repository": "nvidia/Metatron-v1",
+    "revision": "ada816723d62c194c82ffd8fab97a3d8a001f94d",
+    "checkpoint": "G1/inference_last.ckpt",
+    "checkpointSha256": "e5fc2e47a8f9ee9b96a674cabbf236b3c510f887427645a14bc1779b10f0b43a"
+  },
+  "setup": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "simulator": "MuJoCo",
+    "mujocoVersion": "3.5.0",
+    "torchVersion": "2.8.0+cu128",
+    "task": "100 m course with 17 hurdles, each 0.10 m high",
+    "commandSpeedMps": 2.4,
+    "trialDurationSimulationS": 10,
+    "singleProcess": true,
+    "physicsPausedDuringInference": true,
+    "fullInitialContextHashVerified": false
+  },
+  "frequency": {
+    "observationsHistoryGoalsInferenceHz": 50,
+    "physicsAndActionReleaseHz": 1000,
+    "addedDelayResolutionMs": 1,
+    "addedDelayValuesMs": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "measuredOverallControlHz": 49.31642258592218,
+    "wallDurationS": 10.138610502999654,
+    "controlCycles": 500,
+    "medianPipelineReciprocalHz": 100.65999740498526
+  },
+  "pipelineWallTime": {
+    "unit": "ms",
+    "start": "Before observation sampling and footprint calculation",
+    "end": "PD target installed, before physics integration",
+    "cycles": 500,
+    "firstCycleIncluded": true,
+    "summary": {
+      "observation_ms": {
+        "median": 0.222247,
+        "p95": 0.23481234999999998,
+        "maximum": 0.478722
+      },
+      "history_goals_input_ms": {
+        "median": 6.232055,
+        "p95": 6.572952099999999,
+        "maximum": 2129.470626
+      },
+      "inference_and_transfers_ms": {
+        "median": 3.3718565,
+        "p95": 3.6159114499999996,
+        "maximum": 3.944205
+      },
+      "action_to_pd_target_ms": {
+        "median": 0.1069415,
+        "p95": 0.12468729999999996,
+        "maximum": 0.209208
+      },
+      "pipeline_ms": {
+        "median": 9.934433,
+        "p95": 10.481233249999999,
+        "maximum": 2133.870221
+      }
+    },
+    "firstCycle": {
+      "observation_ms": 0.478722,
+      "history_goals_input_ms": 2129.470626,
+      "inference_and_transfers_ms": 3.711665,
+      "action_to_pd_target_ms": 0.209208,
+      "pipeline_ms": 2133.870221
+    },
+    "maximumAfterFirstCycleMs": 11.061826
+  },
+  "addedActionDelay": {
+    "clock": "simulation time",
+    "position": "After inference, before action mapping and PD",
+    "metrics": [
+      "forward progress",
+      "upright time"
+    ],
+    "uprightHeightThresholdM": 0.5,
+    "passCriteria": {
+      "uprightTimeMinPercent": 95,
+      "progressMinFractionOfZeroDelay": 0.9
+    },
+    "results": [
+      {
+        "addedDelayMs": 0,
+        "forwardProgressM": 17.484575801486915,
+        "uprightTimePercent": 100.0,
+        "runs": 5
+      },
+      {
+        "addedDelayMs": 1,
+        "forwardProgressM": 18.773935728564737,
+        "uprightTimePercent": 100.0,
+        "runs": 1
+      },
+      {
+        "addedDelayMs": 2,
+        "forwardProgressM": 18.50820885862414,
+        "uprightTimePercent": 100.0,
+        "runs": 1
+      },
+      {
+        "addedDelayMs": 3,
+        "forwardProgressM": 17.868124213638268,
+        "uprightTimePercent": 100.0,
+        "runs": 1
+      },
+      {
+        "addedDelayMs": 4,
+        "forwardProgressM": 17.46053164319859,
+        "uprightTimePercent": 100.0,
+        "runs": 1
+      },
+      {
+        "addedDelayMs": 5,
+        "forwardProgressM": 17.960059110218214,
+        "uprightTimePercent": 100.0,
+        "runs": 1
+      },
+      {
+        "addedDelayMs": 6,
+        "forwardProgressM": 18.010014275882,
+        "uprightTimePercent": 100.0,
+        "runs": 1
+      },
+      {
+        "addedDelayMs": 7,
+        "forwardProgressM": 17.42062112452865,
+        "uprightTimePercent": 100.0,
+        "runs": 5
+      },
+      {
+        "addedDelayMs": 8,
+        "forwardProgressM": 15.337261152471026,
+        "uprightTimePercent": 92.91,
+        "runs": 5
+      }
+    ],
+    "boundaryRepeats": {
+      "configuredSeeds": [
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "repeatedDelayValuesMs": [
+        0,
+        7,
+        8
+      ],
+      "physicalStartingStateVaried": false,
+      "recordedTrajectoriesIdenticalWithinCondition": true
+    },
+    "largestTestedPassingDelayMs": 7,
+    "firstTestedFailingDelayMs": 8,
+    "delaysBeyond8MsTested": false
+  },
+  "validation": {
+    "originalVsSplitPhysicsDurationSimulationS": 1,
+    "maximumJointPositionError": 0,
+    "maximumJointVelocityError": 0,
+    "timingControlAndMeasuredPoseDataIdentical": true,
+    "unprofiledControlWallS": 10.066932366000401,
+    "measuredWallS": 10.138610502999654,
+    "wallDurationDifferenceNotIsolatedInstrumentationCost": true
+  },
+  "limitations": [
+    "The added-delay result excludes computation from simulation time.",
+    "One scene, speed, duration and physical starting state were tested.",
+    "The shared GPU was not reserved exclusively for the experiment.",
+    "Full independently hashed model/controller/random-generator context equality was not verified.",
+    "The first preparation delay was not profiled further."
+  ]
+}
