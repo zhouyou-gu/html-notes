@@ -3,6 +3,19 @@
   "updated": "2026-11-08",
   "notes": [
     {
+      "title": "Metatron and SONIC interfaces; added action delay — 2026-11-08",
+      "date": "2026-11-08",
+      "path": "notes/metatron-sonic-interfaces-action-delay-2026-11-08.html",
+      "summary": "Numerical goals, motion vectors and feedback history, with setup and results from 105 continuous-physics Metatron action-delay trials.",
+      "tags": [
+        "robot-control",
+        "metatron",
+        "sonic",
+        "action-delay",
+        "experiment"
+      ]
+    },
+    {
       "title": "The binding problem in J-space — 2026-11-02",
       "date": "2026-11-02",
       "path": "notes/j-space-latent-communication-postmortem-2026-11-02.html",

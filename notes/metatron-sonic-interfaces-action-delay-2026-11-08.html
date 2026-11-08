@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Metatron and SONIC interfaces; added action delay — 2026-11-08 | HTML Notes</title>
+  <meta name="description" content="Numerical goals, motion vectors and feedback history, with a 105-trial continuous-physics Metatron action-delay experiment.">
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main class="note-page note-page-wide">
+<nav class="note-nav" aria-label="Site"><a href="../index.html">HTML Notes</a></nav>
+<article class="note-article control-note">
+<header>
+  <p class="eyebrow">Robot control · interfaces and measurements</p>
+  <h1>Metatron and SONIC interfaces; added action delay</h1>
+  <p class="note-dek">What the models receive, where feedback runs, and how 0–20 ms of added action delay affected a simulated G1 across 105 trials.</p>
+  <time datetime="2026-11-08">November 8, 2026</time>
+</header>
+<nav aria-label="Note contents"><ul>
+  <li><a href="#results">Measured result and plot</a></li>
+  <li><a href="#setup">Experiment setup, clocks and delay placement</a></li>
+  <li><a href="#metatron">Metatron: external goals, history and scene data</a></li>
+  <li><a href="#skills">Where the hurdle skill comes from</a></li>
+  <li><a href="#sonic">SONIC and GR00T: motion vectors and local feedback</a></li>
+  <li><a href="#limits">Checks, limits and downloadable data</a></li>
+</ul></nav>
+
+<section id="results">
+<h2>Measured result: larger delays generally reduced movement quality</h2>
+<p>All <strong>105 trials completed</strong>: five runs at each added delay from 0 to 20 ms. Each trial lasted 10 wall seconds. Mean forward progress was <strong>18.294 m at 0 ms</strong> and <strong>10.503 m at 20 ms</strong>; mean upright time was <strong>99.60%</strong> and <strong>53.53%</strong>, respectively. The differences are not monotonic at every 1 ms step, and repeat ranges are wide.</p>
+<figure>
+  <a href="../assets/metatron-sonic-interfaces-action-delay-2026-11-08/action-delay.png"><img src="../assets/metatron-sonic-interfaces-action-delay-2026-11-08/action-delay.png" width="1980" height="1296" alt="Two plots across 0–20 milliseconds of added action delay. Mean progress generally decreases from 18.29 to 10.50 metres; mean upright time from 99.60 to 53.53 percent, with substantial variation between five repeated trials."></a>
+  <figcaption>Lines: means of five runs. Dots: individual runs, slightly offset horizontally for visibility. Shading: observed minimum–maximum, not a confidence interval. Click to view the full plot.</figcaption>
+</figure>
+<p><strong>Forward progress</strong> is final root X minus initial root X. <strong>Upright time</strong> is the percentage of recorded simulation duration for which the preceding root height is at least 0.5 m. It is a height-based measure, not proof of balance, collision-free traversal or full-course completion.</p>
+<div class="table-wrap"><table class="compact-table"><caption>Five runs per delay; upright means root height at least 0.5 m.</caption><thead><tr><th scope="col">Added delay (ms)</th><th scope="col">Progress mean (m)</th><th scope="col">Progress min–max (m)</th><th scope="col">Upright mean (%)</th><th scope="col">Upright min–max (%)</th></tr></thead><tbody><tr><td>0</td><td>18.294</td><td>16.195–19.356</td><td>99.60</td><td>97.98–100.00</td></tr><tr><td>1</td><td>18.137</td><td>14.047–19.489</td><td>98.71</td><td>93.54–100.00</td></tr><tr><td>2</td><td>15.784</td><td>10.744–19.243</td><td>86.25</td><td>65.43–100.00</td></tr><tr><td>3</td><td>14.894</td><td>10.068–18.153</td><td>88.48</td><td>63.60–100.00</td></tr><tr><td>4</td><td>17.192</td><td>7.860–19.623</td><td>87.84</td><td>39.20–100.00</td></tr><tr><td>5</td><td>13.979</td><td>10.093–18.854</td><td>81.99</td><td>53.97–100.00</td></tr><tr><td>6</td><td>17.529</td><td>10.212–19.627</td><td>92.39</td><td>61.94–100.00</td></tr><tr><td>7</td><td>13.377</td><td>10.083–16.242</td><td>75.72</td><td>58.01–93.11</td></tr><tr><td>8</td><td>17.336</td><td>15.365–19.670</td><td>95.44</td><td>87.14–100.00</td></tr><tr><td>9</td><td>12.245</td><td>10.270–18.924</td><td>61.70</td><td>51.27–100.00</td></tr><tr><td>10</td><td>15.118</td><td>14.438–15.782</td><td>84.98</td><td>79.31–97.70</td></tr><tr><td>11</td><td>17.277</td><td>13.124–19.882</td><td>88.80</td><td>66.28–100.00</td></tr><tr><td>12</td><td>14.972</td><td>9.530–19.784</td><td>75.09</td><td>40.56–100.00</td></tr><tr><td>13</td><td>12.741</td><td>9.387–15.871</td><td>62.09</td><td>38.48–87.79</td></tr><tr><td>14</td><td>11.447</td><td>4.497–15.680</td><td>56.64</td><td>19.39–83.37</td></tr><tr><td>15</td><td>6.338</td><td>3.824–10.853</td><td>33.97</td><td>18.11–56.59</td></tr><tr><td>16</td><td>7.534</td><td>3.739–15.468</td><td>40.87</td><td>17.51–78.77</td></tr><tr><td>17</td><td>11.445</td><td>9.515–13.801</td><td>63.76</td><td>51.55–73.70</td></tr><tr><td>18</td><td>5.738</td><td>3.893–10.758</td><td>25.34</td><td>17.05–49.61</td></tr><tr><td>19</td><td>10.979</td><td>5.434–15.416</td><td>58.32</td><td>27.66–85.57</td></tr><tr><td>20</td><td>10.503</td><td>8.271–13.344</td><td>53.53</td><td>34.23–82.80</td></tr></tbody></table></div>
+</section>
+
+<section id="setup">
+<h2>Executed experiment setup</h2>
+<p>This note reports only the latest experiment without wireless. The 105 measured movement windows sum to <strong>17 minutes 30 seconds</strong>; startup, computational warm-up and verification add further elapsed time. A 10-second trial does not test completion of the 100 m course.</p>
+<div class="table-wrap"><table class="compact-table"><thead><tr><th scope="col">Component or parameter</th><th scope="col">Executed setup</th></tr></thead><tbody><tr><td>Robot and scene</td><td>Simulated G1; 17 hurdles, each 0.10 m high, 2.4 m wide and 0.08 m deep. First bar at x=10 m, then 5 m spacing; finish at x=100 m.</td></tr><tr><td>Model and hardware</td><td>Metatron v1 G1 on an RTX 5090 workstation; TensorRT 10.16.0.72, FP32, default TF32 enabled, optimization level 0, CUDA graphs.</td></tr><tr><td>Robot process</td><td>MuJoCo physics, measurements, returned-action selection and PD.</td></tr><tr><td>Model process</td><td>Robot/action history, task-goal generation and TensorRT inference. This is the logical edge role, on the same workstation.</td></tr><tr><td>Transport</td><td>Latest shared-memory slots. No wireless system or network in the application path. Other workloads remained active.</td></tr><tr><td>Start and duration</td><td>Nominal upright pose; immediate 2.4 m/s travel intent; 10 wall seconds. No initial standing wait or physical warm-up. Recovery can override travel goals after a fall.</td></tr><tr><td>Initialization</td><td>Model loading, validation and computational warm-up finish before measurement. Physics advances independently throughout the measured window.</td></tr><tr><td>Repeat design</td><td>0–20 ms inclusive, 1 ms steps, five trials each: 105 trials. All 21 delays shuffled within each of five blocks; order seed 20261108.</td></tr><tr><td>Repeat variation</td><td>Fixed Torch seed 17, identical initial state, no deliberate sensor/pose changes. Asynchronous scheduling and action pickup can change trajectories.</td></tr><tr><td>Goal source</td><td>Project-specific hurdle/steering/recovery code using known hurdle positions and a saved jump reference; tracked-reference mode, 2.6 m trigger, world-space torso goals plus canonicalized jump-pose goals.</td></tr><tr><td>Geometry audit</td><td>Known simulator geometry drives collisions and task code. Executed configuration leaves model scene-box inputs as padding; it does not select the non-padding terrain provider. This is an executed-source audit, not a per-call tensor capture.</td></tr></tbody></table></div>
+<h3>Which components set the frequency?</h3>
+<ul>
+  <li><strong>Physics and PD:</strong> scheduled independently with a 1 ms target period, nominally 1,000 Hz. Achieved rates were 965.99–976.70 Hz across trials.</li>
+  <li><strong>Observation publication:</strong> every 20 physics steps, nominally 50 Hz. At the achieved physics rates this corresponds to roughly 48.3–48.8 observation opportunities per wall second.</li>
+  <li><strong>History, goals and inference:</strong> triggered by a new available observation, with no separate model-frequency clock. An unread observation can be replaced by a newer one.</li>
+  <li><strong>Action application:</strong> checked at every physics step. PD keeps tracking the previous targets until a new action becomes eligible.</li>
+</ul>
+<p>The physics process does not wait for computation. Each trial advanced 9.660–9.768 simulation seconds during approximately 10 wall seconds. Maximum simulation-clock lag across trials was approximately 233–339 ms. Continuous physics is established; strict real-time execution is not.</p>
+<h3>Where the added delay sits</h3>
+<pre><code>Robot measurement → latest observation slot
+                  → history + goals + input preparation → TensorRT
+                  → completed action → added wall-time delay
+                  → next eligible physics/PD tick → joint targets → torque</code></pre>
+<p>For an action completed at time <code>t_complete</code>, the release time is <code>t_release = t_complete + added_delay</code>. The robot installs the newest eligible returned action, with no action-age cutoff. It holds the previous target if none is ready. The deliberately added waiting time is separate from actual computation, handoff and physics pickup time.</p>
+<p><strong>Action interval</strong> is the time between successive new actions. <strong>Action delay</strong> is the time from an observation to applying its action. These tests vary added delay without deliberately changing the observation schedule; achieved intervals can still vary with scheduling and action selection. A 1 ms change in the release setting is not a guarantee of exactly 1 ms change in total delay.</p>
+<h3>Zero-added-delay pipeline timing</h3>
+<p>The five zero-added-delay trials had observation-to-PD medians of <strong>7.787–7.834 ms</strong>. “Zero action delay simulation” here means no deliberately added action wait: actual computation and pickup delay remain present, and physics continues during them.</p>
+<div class="table-wrap"><table class="compact-table"><thead><tr><th scope="col">Measured component</th><th scope="col">Range of five trial medians (ms)</th></tr></thead><tbody><tr><td>Observation pickup → preparation start</td><td>0.684–0.722</td></tr><tr><td>History/goal/input preparation</td><td>4.945–5.018</td></tr><tr><td>Inference wrapper, including the native call</td><td>1.806–1.817</td></tr><tr><td>C++/TensorRT call, nested within the wrapper</td><td>1.444–1.448</td></tr><tr><td>Output publication work</td><td>0.045–0.047</td></tr><tr><td>Completed action → physics/PD installation</td><td>0.604–0.654</td></tr><tr><td>Full observation → PD installation</td><td>7.787–7.834</td></tr></tbody></table></div>
+<p>Each row shows the range of per-trial medians from the latest five zero-delay runs. The native-call row is nested within the wrapper and must not be added again. Component medians need not sum to the median of the full pipeline. The native timer includes the C++/TensorRT call and transfers; it is not a GPU-kernel-only measurement.</p>
+</section>
+
+<section id="metatron">
+<h2>Metatron receives numerical goals and explicit history</h2>
+<p>The tested deterministic export accepts 39 input tensors: current state, eight historical state samples with paired raw actions, a separate nine-entry raw-action history, future body goals with masks, velocity/style cues and scene-box fields. One call returns one current set of 29 joint targets, PD gains and a raw action for history feedback. It does not return an action sequence. The <a href="https://huggingface.co/nvidia/Metatron-v1#inputs-and-outputs">released model card</a> describes the same input contract.</p>
+<p><strong>The goal contains no text.</strong> A phrase such as “jump over the hurdle” must first be converted by task code into numerical targets. A table label such as “push off” is an explanation of a movement phase, not an accepted Metatron command.</p>
+<h3>Readable goal example and actual tensor layout</h3>
+<p>The following JSON is a readable illustration with invented coordinates. It is not the literal model feed or a validated jump trajectory. Each time is relative to the current observation; each position is an XYZ target in metres for the named foot link.</p>
+<pre><code>{
+  &quot;coordinate_frame&quot;: &quot;world&quot;,
+  &quot;body&quot;: &quot;left_ankle_roll_link&quot;,
+  &quot;time_offsets_s&quot;: [
+    0.1,
+    0.25,
+    0.4,
+    0.6,
+    0.8
+  ],
+  &quot;positions_m&quot;: [
+    [
+      1.0,
+      0.11,
+      0.08
+    ],
+    [
+      1.2,
+      0.11,
+      0.16
+    ],
+    [
+      1.4,
+      0.11,
+      0.25
+    ],
+    [
+      1.6,
+      0.11,
+      0.12
+    ],
+    [
+      1.8,
+      0.11,
+      0.055
+    ]
+  ],
+  &quot;position_enabled&quot;: true,
+  &quot;orientation_enabled&quot;: false
+}</code></pre>
+<p>For the tested G1 export, world-goal tensors include <code>ref_pos [1,5,33,3]</code>, <code>ref_rot [1,5,33,4]</code> and <code>time_offsets [1,5]</code>, under the <code>masked_mimic</code> namespace. Position and rotation masks have a flattened size of 50: five times × five selected body parts × two properties. A second goal stream supplies canonicalized poses, independently of their world placement.</p>
+<p>The five selected body parts are the torso, two hands and two feet. Multiple parts and future times are supplied <strong>together in one inference step</strong>; the output coordinates all 29 joints. The 33 body slots in the position array do not mean 33 independently enabled goal parts.</p>
+<h3>Masks specify what is constrained</h3>
+<p>A position mask enables a target; an orientation mask can remain false so that orientation is left free. A visible position target equal to <code>[0,0,0]</code> requests the origin; the same stored values with a disabled mask are unused. Masks are neural-network inputs, and unavailable items are excluded by attention. This is not merely an application-side test. <a href="https://arxiv.org/html/2610.38027v1#S3.SS2">Prompt interface</a>.</p>
+<h3>Scene boxes are separate from body goals</h3>
+<p>The external fields are box centres and full dimensions, object position/orientation, and valid/visible flags. Centres are expressed in the object's frame; the object pose places them in the world. The tested export has one object slot containing two box slots. A sofa can, for example, use separate seat and backrest boxes. This capacity does not encode an arbitrary surrounding scene.</p>
+<pre><code>External scene input: centres + dimensions + object pose + flags
+Inside the exported graph: eight corners per box → robot heading frame
+                         → 24 coordinates per box → learned scene embeddings
+
+External goal input: body poses + arrival times + masks
+Inside the exported graph: relative/canonicalized goal features
+                         → learned goal embeddings
+
+Embeddings + robot history → transformer → condition/latent → action decoder</code></pre>
+<p>The 24 corner coordinates are an <strong>internal representation</strong>, not an extra tensor sent by the experiment application. Their conversion is inside the exported ONNX/TensorRT graph. Invalid boxes are padded and masked. The <a href="https://github.com/NVlabs/ProtoMotions/blob/6a1887f65b8a619c77198431d0ec00d5c88bea2c/protomotions/envs/obs/scene_boxes.py">pinned geometry implementation</a> specifies the coordinates and masks.</p>
+<p>World-goal features include target-minus-current body position in the current heading frame, relative rotations and arrival times. Separate encoders produce 1,024-dimensional embeddings; a six-layer transformer combines available information, and the action decoder also receives current observations and the previous action. Canonicalized pose targets use the target pose's own torso/heading and lowest body height. <a href="https://arxiv.org/html/2610.38027v1#A3">Network details</a>.</p>
+<p><strong>Experiment-specific correction:</strong> the two-box provider described above exists in the local adapter, but the executed hurdle configuration does not select it. Its model scene-box fields remain padding. Hurdle geometry reaches the task code and simulator; these trials do not demonstrate that Metatron perceived the bars through the scene-box embedding.</p>
+</section>
+
+<section id="skills">
+<h2>The hurdle skill is project-specific goal-generation code</h2>
+<p>A skill is ordinary code developed offline by a human or coding agent, then executed at runtime to update goals. It is not generated by Metatron at each step. In this project the hurdle adapter was written during setup; it is <strong>not NVIDIA's exact published hurdle skill</strong>.</p>
+<p>Our reference-jump mode loads saved body poses and orientations, aligns the reference with a known bar, samples future reference frames and packs numerical goals. The tested configuration uses a 2.6 m trigger, canonicalized reference jump-pose targets and world-space torso goals; after clearance it returns to steering, with recovery goals available after falling.</p>
+<pre><code>Saved reference motion + known hurdle geometry + robot state
+                           ↓
+              project-specific skill code
+                           ↓
+          numerical body goals + times + masks
+                           ↓
+                       Metatron</code></pre>
+<p>NVIDIA's published example similarly aligns a reference jump over known bars and supplies torso/hand/foot goals, but its illustrated scene has four 20 cm hurdles and different approach settings. Those demonstrations are not measurements of our 17-bar, 10 cm scene. <a href="https://research.nvidia.com/labs/par/projects/metatron/">Published skill development and hurdle example</a>.</p>
+</section>
+
+<section id="sonic">
+<h2>SONIC: a motion-vector interface with robot/action history</h2>
+<p>SONIC is another learned whole-body controller. In the released v1.1 configuration its decoder receives <strong>one current 64-dimensional motion vector plus 930 robot/action-history values</strong>: ten samples each of base angular velocity (3), joint positions (29), joint velocities (29), previous actions (29) and gravity direction (3). Total input size is 994. There is no explicit history of earlier motion vectors in this decoder input. <a href="https://huggingface.co/nvidia/GEAR-SONIC/blob/main/sonic_v1_1/observation_config.yaml">Released observation configuration</a>.</p>
+<p>One controller call produces one current joint-target action. Holding a motion vector across calls still allows different actions because robot feedback changes; it does not automatically advance through a future motion sequence.</p>
+<p>The authors call the learned representation a “token.” At the external interface it is a floating-point vector. Internally, the v1.1 encoder produces two 32-dimensional vectors with 32 quantization levels per dimension. Their nominal combined space has <code>32^64 = 2^320 ≈ 2.1 × 10^96</code> combinations, not a list of that many known safe movements. The flattened command occupies 256 bytes as 64 float32 values, excluding protocol fields and hand targets. <a href="https://huggingface.co/nvidia/GEAR-SONIC/blob/main/sonic_v1_1/model_config.yaml">Model configuration</a>; <a href="https://github.com/NVlabs/GR00T-WholeBodyControl/blob/main/gear_sonic/trl/modules/universal_token_modules.py">encoder/decoder implementation</a>.</p>
+<h3>Different callers ultimately supply the same motion-command representation</h3>
+<pre><code>Speed/direction/style → motion planner → reference poses → encoder → motion vector
+Human/robot reference motion ────────────────────────────→ encoder → motion vector
+Fine-tuned GR00T ─────────────────────────────────────────────────→ motion vectors
+
+Selected motion vector + fresh robot/action history → SONIC → joint targets → PD</code></pre>
+<p>Thus GR00T is a caller, ZMQ is a transport, and planner commands are an upstream conversion path. They are not separate command inputs to the underlying SONIC decoder. The speed-command planner uses desired velocity/direction/style and recent robot poses to generate future reference motion; the reference is then encoded. <a href="https://nvlabs.github.io/GR00T-WholeBodyControl/references/planner_onnx.html">Planner interface</a>.</p>
+<h3>VLA examples for humanoids</h3>
+<p>GR00T N1.7 documents a Unitree G1 workflow using SONIC motion commands. Figure's Helix 02 is another humanoid VLA system: Figure reports a 200 Hz joint-target layer followed by a learned 1,000 Hz whole-body controller. That 1,000 Hz controller belongs to Helix, not SONIC, and is more than a joint PD loop. Neither system was deployed in this experiment. <a href="https://github.com/NVIDIA/Isaac-GR00T#humanoid-whole-body-control-sonic">GR00T integration</a>; <a href="https://www.figure.ai/news/helix-02">Helix 02 technical description</a>.</p>
+<h3>GR00T supplies a sequence while SONIC closes the feedback loop</h3>
+<p>GR00T accepts images, text instructions and robot state. The documented SONIC workflow fine-tunes it on task demonstrations to predict motion vectors and hand targets. Per future step: 64 motion values + seven left-hand and seven right-hand targets, totaling 78 values. Default output is 40 steps, or 0.8 s at 50 Hz; the configured inference rate is 2.5 Hz. The client sends one selected step at a time, and skips expired steps when a delayed sequence arrives. Predicted vectors are transported as float32 and need not lie exactly on the encoder's quantization levels. Matching GR00T and SONIC checkpoints is required. <a href="https://nvlabs.github.io/GR00T-WholeBodyControl/tutorials/vla_workflow.html">Training workflow</a>; <a href="https://nvlabs.github.io/GR00T-WholeBodyControl/tutorials/vla_inference.html">Inference interface and timing</a>.</p>
+<p>SONIC's paper reports 1–2 ms per controller forward pass and about 12 ms per optional planner forward pass on onboard Jetson Orin with TensorRT/CUDA graphs. Its controller updates at 50 Hz; the paper's separate low-level command publisher runs at 500 Hz. These are different timing quantities. They are published measurements, <strong>not measurements on our workstation</strong>. <a href="https://arxiv.org/html/2511.07820v1#S3.SS5">Deployment timings</a>.</p>
+<p>Action chunking maintains a supply of future commands while a slower model computes. It does not eliminate delayed feedback. Keeping the whole-body controller local gives it fresh robot measurements even when the upstream command is older. Moving that controller across a delayed link would expose its own feedback loop to delay. We did not run SONIC or GR00T, and have not measured a delay-tolerance comparison against Metatron. Methods such as <a href="https://arxiv.org/abs/2506.07339">real-time action chunking</a> additionally coordinate a new predicted sequence with actions already committed during computation; these Metatron trials did not implement that method.</p>
+</section>
+
+<section id="limits">
+<h2>Verification, interpretation and data</h2>
+<p>All 105 reports were independently rechecked: five runs per delay, identical initial state and engine, exact added-delay release times, joint-target mapping, and bytewise equality of all 39 consumed inputs against the full publication path in six startup cases including active recovery. All runtime source files match across trials; only the experiment manager changed for verification and resume.</p>
+<p>Every model computation fully inside the recorded physics window overlapped physics ticks. Thirty-eight computations crossing a window boundary are reported separately. The initial verifier stopped after trial nine because its last computation began after the final physics tick. Completed motion data was retained; the boundary check was corrected and collection continued at trial ten. A resume counting error was fixed before any additional trial ran. All 106 root/per-trial source archives were verified. Normal services were restored, with no persistent backend deployment.</p>
+<p>The results show degradation under larger added delays in this particular implementation and scene. They do not establish a universal maximum tolerable delay, an exact 1 ms failure threshold, or a population fall probability. Fixed initial conditions and scheduling variation are not a randomized sample of terrain, disturbances or robot states. No earlier experiment or removed synchronous-simulation result is included.</p>
+<ul>
+  <li><a href="../assets/metatron-sonic-interfaces-action-delay-2026-11-08/averages.csv">All 21 delay averages, standard deviations and observed ranges (CSV)</a></li>
+  <li><a href="../assets/metatron-sonic-interfaces-action-delay-2026-11-08/trials.csv">All 105 trial metrics (CSV)</a></li>
+  <li><a href="../assets/metatron-sonic-interfaces-action-delay-2026-11-08/setup-and-verification.json">Sanitized setup, timing components, model identities and verification summary (JSON)</a></li>
+  <li><a href="../assets/metatron-sonic-interfaces-action-delay-2026-11-08/action-delay.png">Full-resolution experiment plot (PNG)</a></li>
+</ul>
+<p>This public note contains derived measurements and technical explanations. Raw process logs, host identities, private paths and access configuration are omitted. Illustrative goal data is labelled separately from measured results.</p>
+</section>
+</article>
+</main>
+</body>
+</html>
