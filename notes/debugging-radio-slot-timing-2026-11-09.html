@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Debugging 1 ms radio slot timing in a wireless robot loop — 2026-11-09 | HTML Notes</title>
+  <meta name="description" content="A case study and checklist for debugging radio slot progress, processing deadlines, and physics cadence in a wireless robot loop.">
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<main class="note-page">
+  <nav class="note-nav" aria-label="Site"><a href="../index.html">HTML Notes</a></nav>
+  <article class="note-article control-note">
+    <header>
+      <p class="eyebrow">Robot control · wireless timing</p>
+      <h1>Debugging 1 ms radio slot timing in a wireless robot loop</h1>
+      <p class="note-dek">How a 10-second hurdle test exposed four timing failures, what the traces showed, and how to verify the fixes.</p>
+      <time datetime="2026-11-09">November 9, 2026</time>
+    </header>
+
+    <nav aria-label="Note contents">
+      <ul>
+        <li><a href="#clocks">What to measure</a></li>
+        <li><a href="#physics">Physics and PD ran below 1 kHz</a></li>
+        <li><a href="#progress">Radio progress dipped in short windows</a></li>
+        <li><a href="#contention">The broker exceeded 1 ms during inference</a></li>
+        <li><a href="#refresh">Profile refreshes still caused stalls</a></li>
+        <li><a href="#checklist">Debugging checklist</a></li>
+        <li><a href="#result">Final rerun</a></li>
+      </ul>
+    </nav>
+
+    <section id="clocks">
+      <h2>What to measure</h2>
+      <p>In the wireless hurdle test, a simulated robot sent observations through the user equipment (UE) and base station (gNB) to a TensorRT policy. Actions came back through the radio path and the robot installed them at a physics boundary. The OCUDU channel broker applied the radio channel to in-phase and quadrature (IQ) samples. The broker and TensorRT shared a GPU, while the simulator advanced physics and proportional-derivative (PD) control on a 1 ms wall-clock schedule.</p>
+      <ul>
+        <li><strong>Radio progress.</strong> At 23.04 million IQ samples/s and 15 kHz numerology, one nominal 1 ms slot contains 23,040 samples. Report how many slot equivalents the broker completes in uplink (UL) and downlink (DL) and how far completion trails the nominal clock.</li>
+        <li><strong>Radio processing time.</strong> Time a full batch from broker call entry to return. A call over 1 ms is a processing overrun. When a nominal slot spans fragments, the broker counter uses sample-proportional processing estimates. Report those counters separately from traced full-batch durations and from gNB MAC timing.</li>
+        <li><strong>Robot timing.</strong> Count physics steps, PD updates, and distinct new target installations separately. The policy receives an observation every 20 physics steps. PD can reuse the last target on every tick until another action arrives. Zero added delay still includes observation preparation, radio transit, inference, and action pickup.</li>
+      </ul>
+    </section>
+
+    <section id="physics">
+      <h2>1. Physics and PD ran below 1 kHz</h2>
+      <p><strong>Failure pattern.</strong> Physics and PD each averaged 964.5 Hz even though the median physics tick gap was about 1 ms. The physics gap at the 95th percentile was 2.24 ms, and new targets arrived at 48.2 per second.</p>
+      <p><strong>Analysis.</strong> Comparing scheduled tick boundaries with actual completions exposed delays in the tail. Preparing observations on the physics thread lengthened some ticks. Linux wake-up coalescing could also delay a sleep past its scheduled boundary.</p>
+      <p><strong>Solution.</strong> Move observation preparation to a separate worker. Pass it the state captured at the tick boundary and tighten timer slack on the physics thread.</p>
+      <p><strong>Why it worked.</strong> Physics and PD can continue while the observation is prepared, and the thread can wake closer to its scheduled time. The follow-up recorded 9,999 physics steps and PD updates each over 10 seconds. Physics gap p95 fell to 1.16 ms, while distinct new targets reached 49.8 per second.</p>
+    </section>
+
+    <section id="progress">
+      <h2>2. Radio progress dipped in short windows</h2>
+      <p><strong>Failure pattern.</strong> Early one-second bins fell below 1,000 slots/s. In a later run, the first four seconds cleared that rate and the run averaged about 1,003 slots/s per direction, yet the ninth bin fell to about 996 UL and 997 DL. Catch-up elsewhere in the window hid the dip in the average.</p>
+      <p><strong>Analysis.</strong> Scheduler traces showed radio work ready to run while another task occupied the CPU. One gNB I/O thread waited about 3.55 ms alongside Sionna work. Broker waits over 2 ms also coincided with background health checks. Some trace rings overran, so those events identified specific contention without providing a complete count.</p>
+      <p><strong>Solution.</strong> Give radio I/O and broker processing suitable CPU placements and separate the Sionna worker from those threads. Verify the effective CPU affinity of the running threads, including any spawned during setup.</p>
+      <p><strong>Why it worked.</strong> Separating competing work reduced time spent runnable but off CPU. In the untraced follow-up every one-second bin exceeded 1,000 slots/s in both directions. The broker still recorded processing overruns, which called for a different measurement. <a href="https://docs.kernel.org/trace/ftrace.html">Linux ftrace documentation</a>.</p>
+    </section>
+
+    <section id="contention">
+      <h2>3. The broker exceeded 1 ms during inference</h2>
+      <p><strong>Failure pattern.</strong> With the broker delivering roughly 1,000 slots/s, individual calls still took more than 1 ms. The first shared-GPU changes brought a no-MPS control with 473 processing misses down to 41 in a 10-second run. Those remaining misses called for a per-call trace.</p>
+      <p><strong>Analysis.</strong> In a reproduction, all 42 traced full-batch calls over 1 ms overlapped TensorRT inference, and 34 spent over 0.75 ms in CUDA stream synchronization. The longest runnable CPU wait among those calls was 0.037 ms. The processing CPUs had no trace loss. This pointed to a wait for GPU work, and device events could only time work after the first event began.</p>
+      <p><strong>Solution.</strong> The first changes put the broker and TensorRT on the same CUDA Multi-Process Service (MPS) server, gave the broker high-priority streams, and mapped its per-slot metadata and output buffers. To address the remaining contention, limit TensorRT's active GPU threads and verify both MPS membership and the effective multiprocessor count. The selected cap was 35% for this setup.</p>
+      <p><strong>Why it worked.</strong> MPS lets the two processes submit work through a shared GPU scheduler. Priority favors broker work when resources become available. Mapped buffers remove separate transfers for metadata and output, while the cap limits how much GPU execution capacity TensorRT can occupy. The 35% cap with the earlier broker reduced the count to two misses in one traced run. A 25% comparison had more misses, so the cap was chosen from the measured workload. <a href="https://docs.nvidia.com/deploy/mps/when-to-use-mps.html#dynamic-execution-resource-provisioning">NVIDIA MPS resource provisioning</a>.</p>
+    </section>
+
+    <section id="refresh">
+      <h2>4. Profile refreshes still caused stalls</h2>
+      <p><strong>Failure pattern.</strong> A narrower trace at the 25% cap found 12 full-batch overruns during live channel-profile updates. These events spent most of their time before the final stream synchronization.</p>
+      <p><strong>Analysis.</strong> Probes around the refresh API call measured 0.72–1.04 ms in the copy of device state into pageable host memory. The following explicit refresh sync took only a few microseconds. A CUDA copy with an asynchronous API name can still block the host when pageable memory is involved. <a href="https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html">CUDA copy and synchronization reference</a>.</p>
+      <p><strong>Solution.</strong> Keep the delay history and sample clock resident on the GPU. Upload changed coefficients and live parameters from pinned host memory. Clear the delay history only when the profile change explicitly requires a reset.</p>
+      <p><strong>Why it worked.</strong> The broker can update the host-owned fields without first reading back the device-owned state. All 13 channel tests passed, including the matrix profile-history test. The untraced wireless rerun used the same TensorRT engine and initial robot state and checked the full 10-second window.</p>
+    </section>
+
+    <section id="checklist">
+      <h2>Debugging checklist</h2>
+      <ol>
+        <li><strong>Set the window.</strong> Warm up the model and radio, then use a common monotonic wall-clock window. Take counter snapshots before and after both boundaries, verify that the producer did not restart, and account for the age of the telemetry snapshot.</li>
+        <li><strong>Count the clocks.</strong> For UL and DL separately, take the change in completed slot equivalents divided by elapsed wall seconds. Report one-second bins and the minimum, plus the nominal slots due minus actual progress as drift. Record inter-completion gap p95, p99, and maximum where timestamps are available. Report deadline misses separately. For the robot, report physics and PD rates, simulation time versus wall time, new target cadence, and observation-to-PD latency.</li>
+        <li><strong>Trace the symptom.</strong> For rate dips, check input starvation, queue or output backpressure, and scheduler delays from runnable to running. For overruns, split each broker call into time before, during, and after CUDA synchronization. Correlate the calls with TensorRT and profile updates, and add probes around a suspect copy when the delay occurs before synchronization. Check trace overruns per CPU and separate traced calls from nominal slot estimates.</li>
+        <li><strong>Verify the change.</strong> Hold the scenario, engine, initial state, and measurement window fixed. Verify applied CPU and MPS placement. Use tracing to locate the cause, then remove the probes for the final counter-based comparison. Report timing, radio delivery, and robot motion separately.</li>
+      </ol>
+    </section>
+
+    <section id="result">
+      <h2>Final rerun</h2>
+      <p>The matched runs used the same hurdle scene, TensorRT engine, wireless path, zero added delay, and 1 ms physics period. The final run used the broker refresh patch and the 35% TensorRT cap.</p>
+      <div class="table-wrap">
+        <table class="compact-table">
+          <caption>10 wall seconds per run. UL is uplink and DL is downlink.</caption>
+          <thead><tr><th scope="col">Metric</th><th scope="col">Previous MPS run</th><th scope="col">Patched rerun</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Broker misses, UL / DL</th><td>21 / 20</td><td><strong>0 / 0</strong></td></tr>
+            <tr><th scope="row">Average slots/s, UL / DL</th><td>999.94 / 1,000.02</td><td>1,000.04 / 1,000.06</td></tr>
+            <tr><th scope="row">Lowest one-second rate, UL / DL</th><td>997.98 / 997.80</td><td>999.67 / 999.26</td></tr>
+            <tr><th scope="row">Physics and PD, each</th><td>999.2 Hz</td><td>999.2 Hz</td></tr>
+            <tr><th scope="row">TensorRT call p95</th><td>3.01 ms</td><td>2.04 ms</td></tr>
+            <tr><th scope="row">Observation-to-PD p95</th><td>30.01 ms</td><td>30.97 ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The broker counters showed zero processing misses in the measured window. Some one-second radio rates still fell below 1,000, and the robot fell during the run. A longer run or a changed workload needs its own timing measurement.</p>
+    </section>
+  </article>
+</main>
+</body>
+</html>

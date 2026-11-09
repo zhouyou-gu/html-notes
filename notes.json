@@ -1,7 +1,18 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-11-08",
+  "updated": "2026-11-09",
   "notes": [
+    {
+      "title": "Debugging 1 ms radio slot timing in a wireless robot loop — 2026-11-09",
+      "date": "2026-11-09",
+      "path": "notes/debugging-radio-slot-timing-2026-11-09.html",
+      "summary": "Four timing failures in a wireless hurdle test, with their traces, fixes, and a checklist for measuring slot progress and deadline misses.",
+      "tags": [
+        "robot-control",
+        "wireless",
+        "real-time"
+      ]
+    },
     {
       "title": "Metatron and SONIC interfaces; added action delay — 2026-11-08",
       "date": "2026-11-08",
